@@ -11,7 +11,9 @@ import {
     getAllRecipes,
     type RecipeWithImageURL,
 } from "@/lib/services/recipe.service";
-import { Heart } from "lucide-react";
+import { getFavoriteRecipeIds } from "@/lib/services/favorite.service";
+import { Heart, LogIn } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
@@ -21,11 +23,13 @@ export default function RecipePage() {
 
     const [searchQuery, setSearchQuery] = useState("");
     const [recipes, setRecipes] = useState<RecipeWithImageURL[]>([]);
+    const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     const debouncedSearch = useDebounce(searchQuery, 300);
 
+    // Fetch recipes
     useEffect(() => {
         const fetchRecipes = async () => {
             try {
@@ -53,20 +57,34 @@ export default function RecipePage() {
         fetchRecipes();
     }, []);
 
-    const handleFavoriteToggle = (id: string) => {
-        if (!isAuthenticated) {
-            // Redirect to login if not authenticated
-            router.push("/auth/login?returnUrl=/recipe");
-            return;
-        }
+    // Fetch user favorites when authenticated
+    useEffect(() => {
+        const fetchFavorites = async () => {
+            if (!isAuthenticated || !user) {
+                setFavoriteIds([]);
+                return;
+            }
 
-        setRecipes((prev) =>
-            prev.map((recipe) =>
-                recipe.id === id
-                    ? { ...recipe, isFavorite: !recipe.isFavorite }
-                    : recipe,
-            ),
-        );
+            try {
+                const ids = await getFavoriteRecipeIds(user.id);
+                setFavoriteIds(ids);
+            } catch (err) {
+                console.error("Error fetching favorites:", err);
+            }
+        };
+
+        fetchFavorites();
+    }, [isAuthenticated, user]);
+
+    // Handle favorite change from FavoriteButton
+    const handleFavoriteChange = (recipeId: string, isFavorited: boolean) => {
+        setFavoriteIds((prev) => {
+            if (isFavorited) {
+                return prev.includes(recipeId) ? prev : [...prev, recipeId];
+            } else {
+                return prev.filter((id) => id !== recipeId);
+            }
+        });
     };
 
     const handleLogin = () => {
@@ -110,18 +128,25 @@ export default function RecipePage() {
                         value={searchQuery}
                         onChange={setSearchQuery}
                     />
-                    {isAuthenticated && (
+                    {isAuthenticated ? (
                         <button className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground hover:bg-primary/80 transition-colors">
                             <Heart className="size-4" />
                         </button>
+                    ) : (
+                        <Link
+                            href="/auth/login"
+                            className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/50 text-primary-foreground hover:bg-primary/70 transition-colors"
+                            title="Login untuk akses favorit"
+                        >
+                            <Heart className="size-4" />
+                        </Link>
                     )}
                 </div>
 
-                {/* Wallet Section - Only for authenticated users */}
-                {isAuthenticated && user && (
+                {isAuthenticated && (
                     <section className="mb-8 md:flex md:justify-center">
                         <div className="md:w-full md:max-w-lg">
-                            <WalletCard balance={user.amount_budget || 0} />
+                            <WalletCard balance={user?.amount_budget || 0} />
                         </div>
                     </section>
                 )}
@@ -150,12 +175,19 @@ export default function RecipePage() {
                                 <RecipeCard
                                     key={recipe.id}
                                     recipe={recipe}
-                                    onFavoriteToggle={handleFavoriteToggle}
+                                    isFavorite={favoriteIds.includes(recipe.id)}
+                                    onFavoriteChange={(isFavorited) =>
+                                        handleFavoriteChange(
+                                            recipe.id,
+                                            isFavorited,
+                                        )
+                                    }
                                 />
                             ))}
                         </div>
                     )}
 
+                    {/* Empty State */}
                     {!isLoading && !error && filteredRecipes.length === 0 && (
                         <p className="text-center text-primary-foreground/60">
                             Resep tidak ditemukan.

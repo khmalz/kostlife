@@ -10,7 +10,6 @@ import type { Recipe } from '@/types/recipes';
 
 export interface RecipeWithImageURL extends Recipe {
   imageURL: string;
-  isFavorite: boolean;
 }
 
 /**
@@ -43,14 +42,13 @@ const resolveImageURL = async (imagePath: string): Promise<string> => {
 /**
  * Transform Firebase recipe data to RecipeWithImageURL
  * @param recipe - Recipe from Firebase
- * @returns Recipe with resolved image URL and default isFavorite
+ * @returns Recipe with resolved image URL
  */
 const transformRecipe = async (recipe: Recipe): Promise<RecipeWithImageURL> => {
   const imageURL = await resolveImageURL(recipe.image);
   return {
     ...recipe,
     imageURL,
-    isFavorite: false,
   };
 };
 

@@ -1,21 +1,22 @@
 "use client";
 
-import { Heart, Flame, Clock, ChevronRight } from "lucide-react";
+import { Flame, Clock, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import type { Recipe } from "@/types/recipes";
-import { cn } from "@/lib/utils";
-
-interface RecipeWithFavorite extends Recipe {
-    isFavorite: boolean;
-}
+import { FavoriteButton } from "@/components/favorite-button";
 
 interface RecipeCardProps {
-    recipe: RecipeWithFavorite;
-    onFavoriteToggle?: (id: string) => void;
+    recipe: Recipe;
+    isFavorite?: boolean;
+    onFavoriteChange?: (isFavorited: boolean) => void;
 }
 
-export function RecipeCard({ recipe, onFavoriteToggle }: RecipeCardProps) {
+export function RecipeCard({
+    recipe,
+    isFavorite = false,
+    onFavoriteChange,
+}: RecipeCardProps) {
     const formattedPrice = new Intl.NumberFormat("id-ID", {
         style: "decimal",
         minimumFractionDigits: 0,
@@ -40,19 +41,11 @@ export function RecipeCard({ recipe, onFavoriteToggle }: RecipeCardProps) {
                             ? `${recipe.title.substring(0, 25)}...`
                             : recipe.title}
                     </h3>
-                    <button
-                        onClick={() => onFavoriteToggle?.(recipe.id)}
-                        className="shrink-0"
-                    >
-                        <Heart
-                            className={cn(
-                                "size-5 transition-colors md:size-6",
-                                recipe.isFavorite
-                                    ? "fill-accent text-accent"
-                                    : "text-secondary-foreground/70",
-                            )}
-                        />
-                    </button>
+                    <FavoriteButton
+                        recipeId={recipe.id}
+                        initialFavorited={isFavorite}
+                        onToggle={onFavoriteChange}
+                    />
                 </div>
 
                 <div className="h-px p-0.5 my-2 bg-secondary w-full md:my-1.5 rounded-lg" />
