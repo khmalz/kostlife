@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import Image from "next/image";
 
 type Props = {
@@ -29,7 +29,15 @@ export default function AuthLayout({ children }: Props) {
                     className="w-full flex justify-center"
                 >
                     <div className="max-w-md w-full rounded-2xl shadow-lg p-8 bg-secondary text-secondary-foreground border border-border">
-                        {children}
+                        <Suspense
+                            fallback={
+                                <div className="flex justify-center py-8">
+                                    <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary/30 border-t-primary"></div>
+                                </div>
+                            }
+                        >
+                            {children}
+                        </Suspense>
                     </div>
                 </section>
             </main>
