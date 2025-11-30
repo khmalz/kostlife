@@ -63,9 +63,8 @@ export default function RecipePage() {
     }, [recipes, debouncedSearch]);
 
     return (
-        <div className="min-h-screen bg-primary">
+        <div className="min-h-screen bg-secondary">
             <div className="mx-auto max-w-md px-4 py-6">
-                {/* Header */}
                 <header className="mb-6 flex items-center gap-3">
                     <MobileSidebar />
                     <SearchBar
@@ -75,14 +74,12 @@ export default function RecipePage() {
                     />
                 </header>
 
-                {/* Wallet Card */}
                 <section className="mb-8">
                     <WalletCard balance={40000} />
                 </section>
 
-                {/* Discover Recipes */}
                 <section>
-                    <h2 className="mb-4 text-xl font-bold text-primary-foreground">
+                    <h2 className="mb-4 text-xl font-bold text-white/90">
                         Discover
                         <br />
                         New Recipe

@@ -11,16 +11,16 @@ export function WalletCard({ balance }: WalletCardProps) {
     }).format(balance);
 
     return (
-        <div className="rounded-2xl bg-secondary p-5">
+        <div className="rounded-3xl bg-primary p-5">
             <div className="mb-3 flex items-center gap-2">
-                <CreditCard className="size-5 text-accent" />
-                <span className="text-sm font-medium text-accent">
+                <CreditCard className="size-8 text-primary-foreground" />
+                <span className="text-base font-medium text-primary-foreground">
                     My Wallet
                 </span>
             </div>
             <div>
-                <p className="text-xs text-secondary-foreground/80">Balance</p>
-                <p className="text-2xl font-bold text-secondary-foreground">
+                <p className="text-base text-primary-foreground/80">Balance</p>
+                <p className="text-2xl font-bold text-primary-foreground">
                     IDR {formattedBalance}
                 </p>
             </div>

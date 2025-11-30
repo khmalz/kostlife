@@ -6,8 +6,6 @@
 @theme inline {
     --color-background: var(--background);
     --color-foreground: var(--foreground);
-    --font-sans: var(--font-geist-sans);
-    --font-mono: var(--font-geist-mono);
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -46,7 +44,7 @@
 /* Custom 4-color palette (from user image)
    1: #1F4529  (deep green)
    2: #4B6B3F  (mid green)
-   3: #E8ECD7  (light green)  <-- page background (light mode)
+   3: #EED3B1  (light green)  <-- page background (light mode)
    4: #F5D7BF  (warm beige/peach)
 */
 
@@ -54,7 +52,7 @@
     --radius: 0.625rem;
 
     /* Light theme (default) */
-    --background: #e8ecd7;
+    --background: #eed3b1;
     --foreground: #1f4529;
 
     --card: #ffffff;
@@ -64,10 +62,10 @@
     --popover-foreground: #1f4529;
 
     --primary: #1f4529; /* deep green */
-    --primary-foreground: #e8ecd7;
+    --primary-foreground: #eed3b1;
 
     --secondary: #4b6b3f; /* mid green */
-    --secondary-foreground: #e8ecd7;
+    --secondary-foreground: #eed3b1;
 
     --muted: #d7e1c8; /* subtle muted shade */
     --muted-foreground: #4b6b3f;
@@ -92,9 +90,9 @@
     --sidebar: #ffffff;
     --sidebar-foreground: #1f4529;
     --sidebar-primary: #1f4529;
-    --sidebar-primary-foreground: #e8ecd7;
+    --sidebar-primary-foreground: #eed3b1;
     --sidebar-accent: #4b6b3f;
-    --sidebar-accent-foreground: #e8ecd7;
+    --sidebar-accent-foreground: #eed3b1;
     --sidebar-border: rgba(0, 0, 0, 0.06);
     --sidebar-ring: rgba(31, 69, 41, 0.12);
 }
@@ -102,20 +100,20 @@
 .dark {
     /* Dark theme mappings */
     --background: #1f4529; /* deep green becomes background in dark mode */
-    --foreground: #e8ecd7; /* light green text on dark bg */
+    --foreground: #eed3b1; /* light green text on dark bg */
 
     --card: #27422e; /* slightly lighter than background for surfaces */
-    --card-foreground: #e8ecd7;
+    --card-foreground: #eed3b1;
 
     --popover: #27422e;
-    --popover-foreground: #e8ecd7;
+    --popover-foreground: #eed3b1;
 
     /* primary becomes mid-green for emphasis on dark bg */
     --primary: #4b6b3f;
-    --primary-foreground: #e8ecd7;
+    --primary-foreground: #eed3b1;
 
     --secondary: #3a5a34;
-    --secondary-foreground: #e8ecd7;
+    --secondary-foreground: #eed3b1;
 
     --muted: #365032;
     --muted-foreground: #c9d6b9;
@@ -129,18 +127,18 @@
     --input: rgba(255, 255, 255, 0.04);
     --ring: rgba(255, 255, 255, 0.06);
 
-    --chart-1: #e8ecd7;
+    --chart-1: #eed3b1;
     --chart-2: #4b6b3f;
     --chart-3: #9fb68d;
     --chart-4: #f5d7bf;
     --chart-5: #c6d6b6;
 
     --sidebar: #16321f;
-    --sidebar-foreground: #e8ecd7;
+    --sidebar-foreground: #eed3b1;
     --sidebar-primary: #4b6b3f;
-    --sidebar-primary-foreground: #e8ecd7;
+    --sidebar-primary-foreground: #eed3b1;
     --sidebar-accent: #3a5a34;
-    --sidebar-accent-foreground: #e8ecd7;
+    --sidebar-accent-foreground: #eed3b1;
     --sidebar-border: rgba(255, 255, 255, 0.06);
     --sidebar-ring: rgba(255, 255, 255, 0.06);
 }

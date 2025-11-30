@@ -21,9 +21,9 @@ export function SearchBar({
                 placeholder={placeholder}
                 value={value}
                 onChange={(e) => onChange?.(e.target.value)}
-                className="h-10 rounded-full border-none bg-secondary pl-4 pr-10 text-secondary-foreground placeholder:text-secondary-foreground/60"
+                className="h-10 rounded-full border-foreground ring ring-foreground bg-background pl-4 pr-10 text-foreground placeholder:text-foreground/70"
             />
-            <Search className="absolute right-3 top-1/2 size-5 -translate-y-1/2 text-secondary-foreground/60" />
+            <Search className="absolute right-3 top-1/2 size-5 -translate-y-1/2 text-foreground/70" />
         </div>
     );
 }
