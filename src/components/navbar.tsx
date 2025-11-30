@@ -11,6 +11,7 @@ import { navItems } from "@/data/nav-item";
 
 interface NavbarProps {
     isLoggedIn?: boolean;
+    isLoading?: boolean;
     username?: string;
     onLogin?: () => void;
     onLogout?: () => void;
@@ -18,6 +19,7 @@ interface NavbarProps {
 
 export function Navbar({
     isLoggedIn = false,
+    isLoading = false,
     username,
     onLogin,
     onLogout,
@@ -28,7 +30,6 @@ export function Navbar({
         <header className="hidden md:block w-full bg-primary">
             <div className="mx-auto max-w-7xl px-6 py-2">
                 <nav className="flex items-center justify-between">
-                    {/* Logo */}
                     <Link href="/">
                         <Image
                             src="/assets/logo-light.png"
@@ -39,7 +40,6 @@ export function Navbar({
                         />
                     </Link>
 
-                    {/* Navigation Links */}
                     <ul className="flex items-center gap-8">
                         {navItems.map((link) => (
                             <li key={link.href}>
@@ -58,9 +58,16 @@ export function Navbar({
                         ))}
                     </ul>
 
-                    {/* Auth Buttons */}
                     <div className="flex items-center gap-3">
-                        {isLoggedIn ? (
+                        {isLoading ? (
+                            <div className="flex items-center gap-3 animate-pulse">
+                                <div className="flex items-center gap-2">
+                                    <div className="size-4 rounded-full bg-primary-foreground/20" />
+                                    <div className="h-4 w-20 rounded bg-primary-foreground/20" />
+                                </div>
+                                <div className="h-9 w-24 rounded-md bg-primary-foreground/20" />
+                            </div>
+                        ) : isLoggedIn ? (
                             <>
                                 {username && (
                                     <div className="flex items-center gap-2 text-primary-foreground/80">

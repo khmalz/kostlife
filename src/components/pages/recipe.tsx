@@ -24,7 +24,7 @@ export default function RecipePage({
     error: initialError,
 }: RecipePageProps) {
     const router = useRouter();
-    const { user, isAuthenticated, logout } = useAuth();
+    const { user, isAuthenticated, isLoading, logout } = useAuth();
 
     const [searchQuery, setSearchQuery] = useState("");
     const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
@@ -79,6 +79,7 @@ export default function RecipePage({
             {/* Desktop Navbar */}
             <Navbar
                 isLoggedIn={isAuthenticated}
+                isLoading={isLoading}
                 username={user?.username}
                 onLogin={handleLogin}
                 onLogout={handleLogout}

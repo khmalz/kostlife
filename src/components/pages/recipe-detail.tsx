@@ -16,7 +16,7 @@ export default function RecipeDetailClient({
     recipe,
 }: RecipeDetailClientProps) {
     const router = useRouter();
-    const { user, isAuthenticated, logout } = useAuth();
+    const { user, isAuthenticated, isLoading, logout } = useAuth();
     const [isImageLoaded, setIsImageLoaded] = useState(false);
 
     const formattedPrice = new Intl.NumberFormat("id-ID", {
@@ -41,6 +41,7 @@ export default function RecipeDetailClient({
             {/* Desktop Navbar */}
             <Navbar
                 isLoggedIn={isAuthenticated}
+                isLoading={isLoading}
                 username={user?.username}
                 onLogin={handleLogin}
                 onLogout={handleLogout}

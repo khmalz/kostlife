@@ -21,7 +21,7 @@ import { useState } from "react";
 export function MobileSidebar() {
     const [open, setOpen] = useState(false);
     const router = useRouter();
-    const { user, isAuthenticated, logout } = useAuth();
+    const { user, isAuthenticated, isLoading, logout } = useAuth();
 
     const handleLogin = () => {
         setOpen(false);
@@ -71,20 +71,33 @@ export function MobileSidebar() {
                     </SheetTitle>
                 </div>
 
-                {isAuthenticated && user && (
+                {isLoading ? (
                     <>
                         <div className="px-4 py-3">
-                            <div className="flex items-center gap-3 rounded-lg bg-secondary/20 px-3 py-2">
-                                <div className="flex size-10 items-center justify-center rounded-full bg-secondary/40">
-                                    <User className="size-5 text-primary-foreground" />
-                                </div>
-                                <span className="text-sm font-semibold text-primary-foreground">
-                                    {user.username}
-                                </span>
+                            <div className="flex items-center gap-3 rounded-lg bg-secondary/20 px-3 py-2 animate-pulse">
+                                <div className="size-10 rounded-full bg-secondary/40" />
+                                <div className="h-4 w-24 rounded bg-secondary/40" />
                             </div>
                         </div>
                         <Separator className="bg-secondary/50" />
                     </>
+                ) : (
+                    isAuthenticated &&
+                    user && (
+                        <>
+                            <div className="px-4 py-3">
+                                <div className="flex items-center gap-3 rounded-lg bg-secondary/20 px-3 py-2">
+                                    <div className="flex size-10 items-center justify-center rounded-full bg-secondary/40">
+                                        <User className="size-5 text-primary-foreground" />
+                                    </div>
+                                    <span className="text-sm font-semibold text-primary-foreground">
+                                        {user.username}
+                                    </span>
+                                </div>
+                            </div>
+                            <Separator className="bg-secondary/50" />
+                        </>
+                    )
                 )}
 
                 <nav className="flex flex-col gap-2 px-4 py-4">
@@ -103,7 +116,12 @@ export function MobileSidebar() {
                 <Separator className="my-2 bg-secondary" />
 
                 <div className="px-4">
-                    {isAuthenticated ? (
+                    {isLoading ? (
+                        <div className="flex items-center gap-2 rounded-lg px-2 py-1.5 animate-pulse">
+                            <div className="size-4 rounded bg-secondary/40" />
+                            <div className="h-4 w-16 rounded bg-secondary/40" />
+                        </div>
+                    ) : isAuthenticated ? (
                         <LogoutDialog
                             onConfirm={handleLogout}
                             trigger={
