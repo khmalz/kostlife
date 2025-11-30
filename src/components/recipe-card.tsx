@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Flame, Clock, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -17,6 +18,8 @@ export function RecipeCard({
     isFavorite = false,
     onFavoriteChange,
 }: RecipeCardProps) {
+    const [isImageLoaded, setIsImageLoaded] = useState(false);
+
     const formattedPrice = new Intl.NumberFormat("id-ID", {
         style: "decimal",
         minimumFractionDigits: 0,
@@ -25,12 +28,18 @@ export function RecipeCard({
     return (
         <div className="flex overflow-hidden rounded-2xl bg-primary">
             <div className="relative w-2/5 shrink-0 md:w-32">
+                {!isImageLoaded && (
+                    <div className="absolute inset-0 bg-secondary/30 animate-pulse" />
+                )}
                 <Image
                     src={recipe.image}
                     alt={recipe.title}
                     fill
-                    className="object-cover"
+                    className={`object-cover transition-opacity duration-300 ${
+                        isImageLoaded ? "opacity-100" : "opacity-0"
+                    }`}
                     sizes="(max-width: 768px) 112px, 128px"
+                    onLoad={() => setIsImageLoaded(true)}
                 />
             </div>
 
