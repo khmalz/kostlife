@@ -10,7 +10,7 @@ import {
     SheetTrigger,
     SheetClose,
 } from "@/components/ui/sheet";
-import { LogOut, Menu, X } from "lucide-react";
+import { LogIn, LogOut, Menu, X } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -27,6 +27,12 @@ const sidebarLinks = [
 
 export function MobileSidebar() {
     const [open, setOpen] = useState(false);
+
+    const handleLogin = () => {
+        // Handle login logic here
+        console.log("Login clicked");
+        setOpen(false);
+    };
 
     const handleLogout = () => {
         // Handle logout logic here
@@ -76,6 +82,13 @@ export function MobileSidebar() {
                 </nav>
                 <Separator className="my-4 bg-secondary" />
                 <div className="px-4">
+                    <button
+                        onClick={handleLogin}
+                        className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-primary-foreground text-lg transition-colors hover:bg-destructive/20"
+                    >
+                        <LogIn className="size-5" />
+                        <span className="font-medium">Login</span>
+                    </button>
                     <button
                         onClick={handleLogout}
                         className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-primary-foreground text-lg transition-colors hover:bg-destructive/20"
