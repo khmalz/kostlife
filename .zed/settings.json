@@ -1,0 +1,27 @@
+{
+    // Folder-specific settings
+    //
+    // For a full list of overridable settings, and general information on folder-specific settings,//zed.dev/docs/configuring-zed#settings-files
+    "project_name": "kostlife",
+    "languages": {
+        "JavaScript": {
+            "format_on_save": "on",
+            "use_autoclose": true,
+            "code_actions_on_format": {
+                "source.fixAll.eslint": true,
+                "source.organizeImports": true
+            },
+            "formatter": "prettier"
+        },
+        "TypeScript": {
+            "colorize_brackets": true,
+            "format_on_save": "on",
+            "use_autoclose": true,
+            "code_actions_on_format": {
+                "source.fixAll.eslint": true,
+                "source.organizeImports": true
+            },
+            "formatter": "prettier"
+        }
+    }
+}
