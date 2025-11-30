@@ -1,7 +1,5 @@
+import { redirect } from "next/navigation";
+
 export default function Home() {
-    return (
-        <div>
-            <p>halo</p>
-        </div>
-    );
+    return redirect("/recipe");
 }

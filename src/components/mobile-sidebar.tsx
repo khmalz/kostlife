@@ -4,26 +4,15 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
     Sheet,
+    SheetClose,
     SheetContent,
-    SheetHeader,
     SheetTitle,
     SheetTrigger,
-    SheetClose,
 } from "@/components/ui/sheet";
+import { navItems } from "@/data/nav-item";
 import { LogIn, LogOut, Menu, X } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-
-const sidebarLinks = [
-    {
-        href: "/recipe",
-        label: "Recipe",
-    },
-    {
-        href: "/profile",
-        label: "Profile",
-    },
-];
 
 export function MobileSidebar() {
     const [open, setOpen] = useState(false);
@@ -69,7 +58,7 @@ export function MobileSidebar() {
                 </div>
 
                 <nav className="flex flex-col gap-2 px-4">
-                    {sidebarLinks.map((link) => (
+                    {navItems.map((link) => (
                         <Link
                             key={link.href}
                             href={link.href}
