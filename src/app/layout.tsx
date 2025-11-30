@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Lexend_Deca } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 const lexend = Lexend_Deca({
     variable: "--font-lexend",
@@ -20,7 +21,7 @@ export default function RootLayout({
     return (
         <html lang="en">
             <body className={`${lexend.className} antialiased`}>
-                {children}
+                <AuthProvider>{children}</AuthProvider>
             </body>
         </html>
     );

@@ -1,24 +1,28 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
 import { MobileSidebar } from "@/components/mobile-sidebar";
 import { Navbar } from "@/components/navbar";
+import { RecipeCard } from "@/components/recipe-card";
 import { SearchBar } from "@/components/search-bar";
 import { WalletCard } from "@/components/wallet-card";
-import { RecipeCard } from "@/components/recipe-card";
+import { useAuth } from "@/hooks/useAuth";
+import { useDebounce } from "@/hooks/useDebounce";
 import {
     getAllRecipes,
     type RecipeWithImageURL,
 } from "@/lib/services/recipe.service";
-import { useDebounce } from "@/hooks/useDebounce";
 import { Heart } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 
 export default function RecipePage() {
+    const router = useRouter();
+    const { user, isAuthenticated, logout } = useAuth();
+
     const [searchQuery, setSearchQuery] = useState("");
     const [recipes, setRecipes] = useState<RecipeWithImageURL[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
 
     const debouncedSearch = useDebounce(searchQuery, 300);
 
@@ -50,6 +54,12 @@ export default function RecipePage() {
     }, []);
 
     const handleFavoriteToggle = (id: string) => {
+        if (!isAuthenticated) {
+            // Redirect to login if not authenticated
+            router.push("/auth/login?returnUrl=/recipe");
+            return;
+        }
+
         setRecipes((prev) =>
             prev.map((recipe) =>
                 recipe.id === id
@@ -60,11 +70,11 @@ export default function RecipePage() {
     };
 
     const handleLogin = () => {
-        setIsLoggedIn(true);
+        router.push("/auth/login");
     };
 
     const handleLogout = () => {
-        setIsLoggedIn(false);
+        logout();
     };
 
     const filteredRecipes = useMemo(() => {
@@ -77,7 +87,8 @@ export default function RecipePage() {
         <div className="min-h-screen bg-secondary">
             {/* Desktop Navbar */}
             <Navbar
-                isLoggedIn={isLoggedIn}
+                isLoggedIn={isAuthenticated}
+                username={user?.username}
                 onLogin={handleLogin}
                 onLogout={handleLogout}
             />
@@ -95,20 +106,25 @@ export default function RecipePage() {
 
                 <div className="hidden md:flex md:items-center md:justify-center md:gap-4 md:mb-8 md:max-w-lg md:mx-auto">
                     <SearchBar
-                        placeholder="Lorem ipsum..."
+                        placeholder="Cari resep..."
                         value={searchQuery}
                         onChange={setSearchQuery}
                     />
-                    <button className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground hover:bg-primary/80 transition-colors">
-                        <Heart className="size-4" />
-                    </button>
+                    {isAuthenticated && (
+                        <button className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground hover:bg-primary/80 transition-colors">
+                            <Heart className="size-4" />
+                        </button>
+                    )}
                 </div>
 
-                <section className="mb-8 md:flex md:justify-center">
-                    <div className="md:w-full md:max-w-lg">
-                        <WalletCard balance={40000} />
-                    </div>
-                </section>
+                {/* Wallet Section - Only for authenticated users */}
+                {isAuthenticated && user && (
+                    <section className="mb-8 md:flex md:justify-center">
+                        <div className="md:w-full md:max-w-lg">
+                            <WalletCard balance={user.amount_budget || 0} />
+                        </div>
+                    </section>
+                )}
 
                 <section>
                     <h2 className="mb-4 text-xl font-bold text-primary-foreground md:text-2xl md:mb-6">
@@ -140,7 +156,6 @@ export default function RecipePage() {
                         </div>
                     )}
 
-                    {/* Empty State */}
                     {!isLoading && !error && filteredRecipes.length === 0 && (
                         <p className="text-center text-primary-foreground/60">
                             Resep tidak ditemukan.

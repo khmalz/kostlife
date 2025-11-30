@@ -1,33 +1,37 @@
-'use client';
-
+import {
+    getAuthCookie,
+    removeAuthCookie,
+    setAuthCookie,
+    type UserSession,
+} from '@/lib/cookies';
+import {
+    hashPasswordWithSalt,
+    verifyPasswordWithSalt,
+} from '@/lib/crypto';
 import {
     addDocument,
+    getDocument,
     queryDocuments,
-    updateDocument
+    updateDocument,
 } from '@/lib/firebase/firestore';
-
-// ==================== TYPES ====================
 
 export interface User {
   id: string;
   username: string;
-  password: string; // Hash di production dengan bcrypt!
-  amount_budget: number; // Budget yang tersedia
+  password: string; // Hashed password
+  salt: string; // Salt for password hashing
+  amount_budget: number;
   createdAt: string;
   updatedAt?: string;
 }
 
-// ==================== AUTH FUNCTIONS ====================
+export type SafeUser = Omit<User, 'password' | 'salt'>;
 
-/**
- * Register user baru
- * PENTING: Di production, hash password dengan bcrypt!
- */
 export const registerUser = async (
   username: string,
   password: string,
   initialBudget: number = 0
-): Promise<{ success: boolean; userId?: string; error?: string }> => {
+): Promise<{ success: boolean; user?: SafeUser; error?: string }> => {
   try {
     // Check if username already exists
     const existingUsers = await queryDocuments<User>(
@@ -39,36 +43,48 @@ export const registerUser = async (
       return { success: false, error: 'Username sudah digunakan' };
     }
 
-    // Create new user
-    // PENTING: Hash password di production!
+    // Hash password with salt
+    const { hash, salt } = await hashPasswordWithSalt(password);
+
     const userId = await addDocument('users', {
       username,
-      password, // TODO: Hash dengan bcrypt!
+      password: hash,
+      salt,
       amount_budget: initialBudget,
       createdAt: new Date().toISOString(),
     });
 
-    return { success: true, userId };
+    const user: SafeUser = {
+      id: userId,
+      username,
+      amount_budget: initialBudget,
+      createdAt: new Date().toISOString(),
+    };
+
+    // Set auth cookie (7 days expiry)
+    const session: UserSession = {
+      id: userId,
+      username,
+      amount_budget: initialBudget,
+    };
+    setAuthCookie(session);
+
+    return { success: true, user };
   } catch (error) {
     console.error('Register error:', error);
     return { success: false, error: 'Gagal registrasi' };
   }
 };
 
-/**
- * Login user
- */
 export const loginUser = async (
   username: string,
   password: string
-): Promise<{ success: boolean; user?: User; error?: string }> => {
+): Promise<{ success: boolean; user?: SafeUser; error?: string }> => {
   try {
+    // find user by username only
     const users = await queryDocuments<User>(
       'users',
-      [
-        { field: 'username', operator: '==', value: username },
-        { field: 'password', operator: '==', value: password }, // TODO: Compare hash!
-      ]
+      [{ field: 'username', operator: '==', value: username }]
     );
 
     if (users.length === 0) {
@@ -77,46 +93,71 @@ export const loginUser = async (
 
     const user = users[0];
 
-    // Simpan ke localStorage
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('currentUser', JSON.stringify(user));
+    // Verify password with stored hash and salt
+    const isValidPassword = await verifyPasswordWithSalt(
+      password,
+      user.password,
+      user.salt
+    );
+
+    if (!isValidPassword) {
+      return { success: false, error: 'Username atau password salah' };
     }
 
-    return { success: true, user };
+    const safeUser: SafeUser = {
+      id: user.id,
+      username: user.username,
+      amount_budget: user.amount_budget,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
+
+    // Set auth cookie (7 days expiry)
+    const session: UserSession = {
+      id: user.id,
+      username: user.username,
+      amount_budget: user.amount_budget,
+    };
+    setAuthCookie(session);
+
+    return { success: true, user: safeUser };
   } catch (error) {
     console.error('Login error:', error);
     return { success: false, error: 'Gagal login' };
   }
 };
 
-/**
- * Get current logged in user
- */
-export const getCurrentUser = (): User | null => {
-  if (typeof window === 'undefined') return null;
+export const getCurrentUser = (): UserSession | null => {
+  return getAuthCookie();
+};
 
-  const userStr = localStorage.getItem('currentUser');
-  if (!userStr) return null;
+export const logoutUser = (): void => {
+  removeAuthCookie();
+};
 
+export const isLoggedIn = (): boolean => {
+  return getAuthCookie() !== null;
+};
+
+export const getUserById = async (userId: string): Promise<SafeUser | null> => {
   try {
-    return JSON.parse(userStr);
-  } catch {
+    const user = await getDocument<User>('users', userId);
+    if (!user) return null;
+
+    // Return without password and salt
+    return {
+      id: user.id,
+      username: user.username,
+      amount_budget: user.amount_budget,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
+  } catch (error) {
+    console.error('Get user error:', error);
     return null;
   }
 };
 
-/**
- * Logout user
- */
-export const logoutUser = (): void => {
-  if (typeof window !== 'undefined') {
-    localStorage.removeItem('currentUser');
-  }
-};
-
-/**
- * Update user budget amount
- */
 export const updateUserBudget = async (
   userId: string,
   newAmount: number
@@ -127,16 +168,88 @@ export const updateUserBudget = async (
       updatedAt: new Date().toISOString(),
     });
 
-    // Update localStorage jika user yang sedang login
-    const currentUser = getCurrentUser();
-    if (currentUser && currentUser.id === userId) {
-      currentUser.amount_budget = newAmount;
-      localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    // Update cookie if the updated user is the current user
+    const currentSession = getAuthCookie();
+    if (currentSession && currentSession.id === userId) {
+      const updatedSession: UserSession = {
+        ...currentSession,
+        amount_budget: newAmount,
+      };
+      setAuthCookie(updatedSession);
     }
 
     return { success: true };
   } catch (error) {
     console.error('Update budget error:', error);
     return { success: false, error: 'Gagal update budget' };
+  }
+};
+
+export const updateUserPassword = async (
+  userId: string,
+  currentPassword: string,
+  newPassword: string
+): Promise<{ success: boolean; error?: string }> => {
+  try {
+    // Get user to verify current password
+    const user = await getDocument<User>('users', userId);
+    if (!user) {
+      return { success: false, error: 'User tidak ditemukan' };
+    }
+
+    // Verify current password
+    const isValidPassword = await verifyPasswordWithSalt(
+      currentPassword,
+      user.password,
+      user.salt
+    );
+
+    if (!isValidPassword) {
+      return { success: false, error: 'Password saat ini salah' };
+    }
+
+    // Hash new password with new salt
+    const { hash, salt } = await hashPasswordWithSalt(newPassword);
+
+    await updateDocument('users', userId, {
+      password: hash,
+      salt,
+      updatedAt: new Date().toISOString(),
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error('Update password error:', error);
+    return { success: false, error: 'Gagal update password' };
+  }
+};
+
+/**
+ * Refresh user session from Firestore
+ */
+export const refreshUserSession = async (): Promise<{ success: boolean; user?: UserSession; error?: string }> => {
+  try {
+    const currentSession = getAuthCookie();
+    if (!currentSession) {
+      return { success: false, error: 'Tidak ada sesi aktif' };
+    }
+
+    const freshUser = await getUserById(currentSession.id);
+    if (!freshUser) {
+      removeAuthCookie();
+      return { success: false, error: 'User tidak ditemukan' };
+    }
+
+    const updatedSession: UserSession = {
+      id: freshUser.id,
+      username: freshUser.username,
+      amount_budget: freshUser.amount_budget,
+    };
+    setAuthCookie(updatedSession);
+
+    return { success: true, user: updatedSession };
+  } catch (error) {
+    console.error('Refresh session error:', error);
+    return { success: false, error: 'Gagal refresh sesi' };
   }
 };

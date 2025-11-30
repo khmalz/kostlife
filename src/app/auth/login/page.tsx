@@ -2,32 +2,57 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function LoginPage() {
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const { login, isLoading: authLoading } = useAuth();
+
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [errors, setErrors] = useState<string | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const validate = () => {
         if (!username.trim() || !password) {
-            return "Please fill in all fields.";
+            return "Mohon isi semua field.";
         }
         if (password.length < 6) {
-            return "Password should be at least 6 characters.";
+            return "Password minimal 6 karakter.";
         }
         return null;
     };
 
-    const onSubmit = (e: React.FormEvent) => {
+    const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
         const v = validate();
         setErrors(v);
         if (v) return;
 
-        console.log("Login:", { username, password });
-        alert(`Logged in (demo): ${username}`);
+        setIsSubmitting(true);
+
+        try {
+            const result = await login(username, password);
+
+            if (result.success) {
+                const returnUrl = searchParams.get("returnUrl") || "/recipe";
+                router.push(returnUrl);
+            } else {
+                setErrors(result.error || "Login gagal. Silakan coba lagi.");
+            }
+        } catch (error) {
+            console.error("Login error:", error);
+            setErrors("Terjadi kesalahan. Silakan coba lagi.");
+        } finally {
+            setIsSubmitting(false);
+        }
     };
+
+    const isLoading = isSubmitting || authLoading;
 
     return (
         <div className="w-full space-y-6">
@@ -59,7 +84,8 @@ export default function LoginPage() {
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         placeholder="Username"
-                        className="w-full py-3 px-5 rounded-full text-sm font-medium bg-accent text-accent-foreground placeholder:text-accent-foreground/70 border-0 focus:outline-none focus:ring-2 focus:ring-ring"
+                        disabled={isLoading}
+                        className="w-full py-3 px-5 rounded-full text-sm font-medium bg-accent text-accent-foreground placeholder:text-accent-foreground/70 border-0 focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50 disabled:cursor-not-allowed"
                         autoComplete="username"
                         aria-invalid={!!errors}
                     />
@@ -76,14 +102,16 @@ export default function LoginPage() {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="Password"
-                        className="w-full py-3 px-5 pr-12 rounded-full text-sm font-medium bg-accent text-accent-foreground placeholder:text-accent-foreground/70 border-0 focus:outline-none focus:ring-2 focus:ring-ring"
+                        disabled={isLoading}
+                        className="w-full py-3 px-5 pr-12 rounded-full text-sm font-medium bg-accent text-accent-foreground placeholder:text-accent-foreground/70 border-0 focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50 disabled:cursor-not-allowed"
                         autoComplete="current-password"
                         aria-invalid={!!errors}
                     />
                     <button
                         type="button"
                         onClick={() => setShowPassword((s) => !s)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-accent-foreground hover:text-accent-foreground/80 transition-colors"
+                        disabled={isLoading}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-accent-foreground hover:text-accent-foreground/80 transition-colors disabled:opacity-50"
                         aria-label={
                             showPassword ? "Hide password" : "Show password"
                         }
@@ -117,14 +145,41 @@ export default function LoginPage() {
                 <div className="pt-2">
                     <button
                         type="submit"
-                        className="w-full py-3 rounded-full font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors duration-150"
+                        disabled={isLoading}
+                        className="w-full py-3 rounded-full font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
-                        Login
+                        {isLoading ? (
+                            <>
+                                <svg
+                                    className="animate-spin h-5 w-5"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <circle
+                                        className="opacity-25"
+                                        cx="12"
+                                        cy="12"
+                                        r="10"
+                                        stroke="currentColor"
+                                        strokeWidth="4"
+                                    ></circle>
+                                    <path
+                                        className="opacity-75"
+                                        fill="currentColor"
+                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                    ></path>
+                                </svg>
+                                <span>Logging in...</span>
+                            </>
+                        ) : (
+                            "Login"
+                        )}
                     </button>
                 </div>
 
                 <div className="text-center text-sm text-secondary-foreground/80 pt-1">
-                    Don't have an account?{" "}
+                    Belum punya akun?{" "}
                     <Link
                         href="/auth/register"
                         className="underline font-medium hover:text-background transition-colors"
