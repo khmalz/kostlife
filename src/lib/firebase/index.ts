@@ -1,13 +1,12 @@
 // Firebase App and Firestore
-export { default as app, db } from '../firebase';
+export { default as app, db, storage } from '../firebase';
 
 // Firestore helpers
 export {
-  getDocument,
-  getDocuments,
-  addDocument,
-  setDocument,
-  updateDocument,
-  deleteDocument,
-  queryDocuments,
+    addDocument, deleteDocument, getDocument,
+    getDocuments, queryDocuments, setDocument,
+    updateDocument
 } from './firestore';
+
+// Storage helpers
+export { getImageURL, getMultipleImageURLs } from './storage';
