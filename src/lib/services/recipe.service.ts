@@ -6,26 +6,53 @@ import {
     queryDocuments,
 } from '@/lib/firebase/firestore';
 import { getImageURL } from '@/lib/firebase/storage';
-
-// ==================== TYPES ====================
-
-export interface Recipe {
-  id: string;
-  title: string;
-  price: number;
-  calories: number;
-  cookTime: number;
-  image: string; // Path in Firebase Storage
-  isFavorite: boolean;
-  ingredients: string[];
-  instructions: string[];
-  createdAt?: string;
-  updatedAt?: string;
-}
+import type { Recipe } from '@/types/recipes';
 
 export interface RecipeWithImageURL extends Recipe {
-  imageURL: string; // Full download URL from Storage
+  imageURL: string;
+  isFavorite: boolean;
 }
+
+/**
+ * Check if the image path is an external URL (e.g., picsum, unsplash, etc.)
+ * @param imagePath - Image path or URL
+ * @returns true if it's an external URL
+ */
+const isExternalURL = (imagePath: string): boolean => {
+  return imagePath.startsWith('http://') || imagePath.startsWith('https://');
+};
+
+/**
+ * Resolve image URL - use directly if external URL, otherwise fetch from Firebase Storage
+ * @param imagePath - Path in Firebase Storage or external URL
+ * @returns Full download URL or the original URL
+ */
+const resolveImageURL = async (imagePath: string): Promise<string> => {
+  try {
+    // If imagePath is already an external URL (picsum, etc.), return it as-is
+    if (isExternalURL(imagePath)) {
+      return imagePath;
+    }
+    // Otherwise, get from Firebase Storage
+    return await getImageURL(imagePath);
+  } catch {
+    return '';
+  }
+};
+
+/**
+ * Transform Firebase recipe data to RecipeWithImageURL
+ * @param recipe - Recipe from Firebase
+ * @returns Recipe with resolved image URL and default isFavorite
+ */
+const transformRecipe = async (recipe: Recipe): Promise<RecipeWithImageURL> => {
+  const imageURL = await resolveImageURL(recipe.image);
+  return {
+    ...recipe,
+    imageURL,
+    isFavorite: false,
+  };
+};
 
 // ==================== RECIPE FUNCTIONS ====================
 
@@ -44,13 +71,7 @@ export const getRecipe = async (
       return null;
     }
 
-    // Get image URL from storage
-    const imageURL = await getImageURL(recipe.image);
-
-    return {
-      ...recipe,
-      imageURL,
-    };
+    return await transformRecipe(recipe);
   } catch (error) {
     console.error('Error getting recipe:', error);
     return null;
@@ -65,51 +86,14 @@ export const getAllRecipes = async (): Promise<RecipeWithImageURL[]> => {
   try {
     const recipes = await getDocuments<Recipe>('recipes');
 
-    // Resolve all image URLs
+    // Resolve all image URLs in parallel
     const recipesWithURLs = await Promise.all(
-      recipes.map(async (recipe) => {
-        try {
-          const imageURL = await getImageURL(recipe.image);
-          return { ...recipe, imageURL };
-        } catch {
-          // Return empty string if image not found
-          return { ...recipe, imageURL: '' };
-        }
-      })
+      recipes.map(transformRecipe)
     );
 
     return recipesWithURLs;
   } catch (error) {
     console.error('Error getting all recipes:', error);
-    return [];
-  }
-};
-
-/**
- * Get favorite recipes
- * @returns Array of favorite recipes with resolved image URLs
- */
-export const getFavoriteRecipes = async (): Promise<RecipeWithImageURL[]> => {
-  try {
-    const recipes = await queryDocuments<Recipe>(
-      'recipes',
-      [{ field: 'isFavorite', operator: '==', value: true }]
-    );
-
-    const recipesWithURLs = await Promise.all(
-      recipes.map(async (recipe) => {
-        try {
-          const imageURL = await getImageURL(recipe.image);
-          return { ...recipe, imageURL };
-        } catch {
-          return { ...recipe, imageURL: '' };
-        }
-      })
-    );
-
-    return recipesWithURLs;
-  } catch (error) {
-    console.error('Error getting favorite recipes:', error);
     return [];
   }
 };
@@ -131,14 +115,7 @@ export const getRecipesByMaxPrice = async (
     );
 
     const recipesWithURLs = await Promise.all(
-      recipes.map(async (recipe) => {
-        try {
-          const imageURL = await getImageURL(recipe.image);
-          return { ...recipe, imageURL };
-        } catch {
-          return { ...recipe, imageURL: '' };
-        }
-      })
+      recipes.map(transformRecipe)
     );
 
     return recipesWithURLs;
@@ -165,14 +142,7 @@ export const getRecipesByMaxCalories = async (
     );
 
     const recipesWithURLs = await Promise.all(
-      recipes.map(async (recipe) => {
-        try {
-          const imageURL = await getImageURL(recipe.image);
-          return { ...recipe, imageURL };
-        } catch {
-          return { ...recipe, imageURL: '' };
-        }
-      })
+      recipes.map(transformRecipe)
     );
 
     return recipesWithURLs;
@@ -199,14 +169,7 @@ export const getRecipesByMaxCookTime = async (
     );
 
     const recipesWithURLs = await Promise.all(
-      recipes.map(async (recipe) => {
-        try {
-          const imageURL = await getImageURL(recipe.image);
-          return { ...recipe, imageURL };
-        } catch {
-          return { ...recipe, imageURL: '' };
-        }
-      })
+      recipes.map(transformRecipe)
     );
 
     return recipesWithURLs;

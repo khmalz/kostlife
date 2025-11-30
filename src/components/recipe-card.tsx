@@ -3,11 +3,15 @@
 import { Heart, Flame, Clock, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import type { Recipe } from "@/data/recipes";
+import type { Recipe } from "@/types/recipes";
 import { cn } from "@/lib/utils";
 
+interface RecipeWithFavorite extends Recipe {
+    isFavorite: boolean;
+}
+
 interface RecipeCardProps {
-    recipe: Recipe;
+    recipe: RecipeWithFavorite;
     onFavoriteToggle?: (id: string) => void;
 }
 
@@ -29,7 +33,6 @@ export function RecipeCard({ recipe, onFavoriteToggle }: RecipeCardProps) {
                 />
             </div>
 
-            {/* Recipe Info */}
             <div className="flex flex-1 flex-col justify-between py-1">
                 <div className="flex items-start justify-between gap-2">
                     <h3 className="text-base font-semibold leading-tight text-primary-foreground">
