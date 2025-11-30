@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/sheet";
 import { navItems } from "@/data/nav-item";
 import { LogIn, LogOut, Menu, X } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -42,7 +43,7 @@ export function MobileSidebar() {
                 </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-72 bg-primary p-0">
-                <div className="flex items-center w-full px-6 py-6">
+                <div className="flex items-center w-full px-6 py-2">
                     <SheetClose
                         aria-label="Close menu"
                         className="inline-flex size-8 items-center justify-center rounded-md text-primary-foreground/80 hover:bg-secondary/40 hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -51,9 +52,19 @@ export function MobileSidebar() {
                         <span className="sr-only">Close</span>
                     </SheetClose>
                     <SheetTitle asChild>
-                        <h2 className="text-2xl font-bold text-primary-foreground m-0 ml-auto">
-                            KostLife
-                        </h2>
+                        <Link
+                            href="/"
+                            className="ml-auto"
+                            onClick={() => setOpen(false)}
+                        >
+                            <Image
+                                src="/assets/logo-light.png"
+                                alt="KostLife"
+                                width={100}
+                                height={40}
+                                className="size-18 w-auto"
+                            />
+                        </Link>
                     </SheetTitle>
                 </div>
 

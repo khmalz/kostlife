@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { LogIn, LogOut } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -28,14 +29,17 @@ export function Navbar({ isLoggedIn = false, onLogin, onLogout }: NavbarProps) {
 
     return (
         <header className="hidden md:block w-full bg-primary">
-            <div className="mx-auto max-w-7xl px-6 py-4">
+            <div className="mx-auto max-w-7xl px-6 py-2">
                 <nav className="flex items-center justify-between">
                     {/* Logo */}
-                    <Link
-                        href="/"
-                        className="text-2xl font-bold text-primary-foreground"
-                    >
-                        KostLife
+                    <Link href="/">
+                        <Image
+                            src="/assets/logo-light.png"
+                            alt="KostLife"
+                            width={120}
+                            height={48}
+                            className="size-23"
+                        />
                     </Link>
 
                     {/* Navigation Links */}
@@ -63,7 +67,7 @@ export function Navbar({ isLoggedIn = false, onLogin, onLogout }: NavbarProps) {
                             <Button
                                 variant="ghost"
                                 onClick={handleLogout}
-                                className="text-primary-foreground hover:bg-secondary hover:text-primary-foreground"
+                                className="text-primary-foreground text-base hover:bg-secondary hover:text-primary-foreground"
                             >
                                 <LogOut className="size-4 mr-2" />
                                 Logout
@@ -72,7 +76,7 @@ export function Navbar({ isLoggedIn = false, onLogin, onLogout }: NavbarProps) {
                             <Button
                                 variant="ghost"
                                 onClick={handleLogin}
-                                className="text-primary-foreground hover:bg-secondary hover:text-primary-foreground"
+                                className="text-primary-foreground text-base hover:bg-secondary hover:text-primary-foreground"
                             >
                                 <LogIn className="size-4 mr-2" />
                                 Login
