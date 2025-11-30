@@ -108,7 +108,7 @@ export default function RecipePage({
                 <header className="mb-6 flex items-center gap-3 md:hidden">
                     <MobileSidebar />
                     <SearchBar
-                        placeholder="Cari resep..."
+                        placeholder="Search recipe..."
                         value={searchQuery}
                         onChange={setSearchQuery}
                     />
@@ -116,7 +116,7 @@ export default function RecipePage({
 
                 <div className="hidden md:flex md:items-center md:justify-center md:gap-4 md:mb-8 md:max-w-lg md:mx-auto">
                     <SearchBar
-                        placeholder="Cari resep..."
+                        placeholder="Search recipe..."
                         value={searchQuery}
                         onChange={setSearchQuery}
                     />
@@ -130,8 +130,8 @@ export default function RecipePage({
                             }`}
                             title={
                                 showFavoritesOnly
-                                    ? "Tampilkan semua resep"
-                                    : "Tampilkan favorit saja"
+                                    ? "Show all recipes"
+                                    : "Show favorites only"
                             }
                         >
                             <Heart
@@ -167,8 +167,8 @@ export default function RecipePage({
                                 }`}
                                 title={
                                     showFavoritesOnly
-                                        ? "Tampilkan semua resep"
-                                        : "Tampilkan favorit saja"
+                                        ? "Show all recipes"
+                                        : "Show favorites only"
                                 }
                             >
                                 <Heart
@@ -205,8 +205,8 @@ export default function RecipePage({
                     {!initialError && filteredRecipes.length === 0 && (
                         <p className="text-center text-primary-foreground/60">
                             {showFavoritesOnly
-                                ? "Belum ada resep favorit."
-                                : "Resep tidak ditemukan."}
+                                ? "No favorite recipes."
+                                : "No recipes found."}
                         </p>
                     )}
                 </section>

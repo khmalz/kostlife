@@ -37,18 +37,18 @@ export function LogoutDialog({
             </AlertDialogTrigger>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>Konfirmasi Logout</AlertDialogTitle>
+                    <AlertDialogTitle>Logout Confirmation</AlertDialogTitle>
                     <AlertDialogDescription>
-                        Apakah kamu yakin?
+                        Are you sure?
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel>Batal</AlertDialogCancel>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction
                         onClick={onConfirm}
                         className="bg-destructive text-primary-foreground hover:bg-destructive/90"
                     >
-                        Ya, Logout
+                        Yes, Logout
                     </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>

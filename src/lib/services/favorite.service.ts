@@ -76,7 +76,7 @@ export const addToFavorites = async (
         return { success: true };
     } catch (error) {
         console.error('Add to favorites error:', error);
-        return { success: false, error: 'Gagal menambahkan ke favorit' };
+        return { success: false, error: 'Failed to add to favorites' };
     }
 };
 
@@ -103,7 +103,7 @@ export const removeFromFavorites = async (
         return { success: true };
     } catch (error) {
         console.error('Remove from favorites error:', error);
-        return { success: false, error: 'Gagal menghapus dari favorit' };
+        return { success: false, error: 'Failed to remove from favorites' };
     }
 };
 
@@ -123,6 +123,6 @@ export const toggleFavorite = async (
         }
     } catch (error) {
         console.error('Toggle favorite error:', error);
-        return { success: false, error: 'Gagal mengubah status favorit' };
+        return { success: false, error: 'Failed to change favorite status' };
     }
 };

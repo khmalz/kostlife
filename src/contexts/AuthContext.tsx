@@ -80,12 +80,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
                     return { success: true };
                 }
 
-                return { success: false, error: result.error || "Login gagal" };
+                return {
+                    success: false,
+                    error: result.error || "Login failed",
+                };
             } catch (error) {
                 console.error("Login error:", error);
                 return {
                     success: false,
-                    error: "Terjadi kesalahan saat login",
+                    error: "An error occurred during login",
                 };
             } finally {
                 setIsLoading(false);
@@ -120,13 +123,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
                 return {
                     success: false,
-                    error: result.error || "Registrasi gagal",
+                    error: result.error || "Registrasi failed",
                 };
             } catch (error) {
                 console.error("Register error:", error);
                 return {
                     success: false,
-                    error: "Terjadi kesalahan saat registrasi",
+                    error: "An error occurred during registration",
                 };
             } finally {
                 setIsLoading(false);

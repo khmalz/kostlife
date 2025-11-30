@@ -40,7 +40,7 @@ export const registerUser = async (
     );
 
     if (existingUsers.length > 0) {
-      return { success: false, error: 'Username sudah digunakan' };
+      return { success: false, error: 'Username already exists' };
     }
 
     // Hash password with salt
@@ -72,7 +72,7 @@ export const registerUser = async (
     return { success: true, user };
   } catch (error) {
     console.error('Register error:', error);
-    return { success: false, error: 'Gagal registrasi' };
+    return { success: false, error: 'Registration failed' };
   }
 };
 
@@ -88,7 +88,7 @@ export const loginUser = async (
     );
 
     if (users.length === 0) {
-      return { success: false, error: 'Username atau password salah' };
+      return { success: false, error: 'Username or password is incorrect' };
     }
 
     const user = users[0];
@@ -101,7 +101,7 @@ export const loginUser = async (
     );
 
     if (!isValidPassword) {
-      return { success: false, error: 'Username atau password salah' };
+      return { success: false, error: 'Username or password is incorrect' };
     }
 
     const safeUser: SafeUser = {
@@ -123,7 +123,7 @@ export const loginUser = async (
     return { success: true, user: safeUser };
   } catch (error) {
     console.error('Login error:', error);
-    return { success: false, error: 'Gagal login' };
+    return { success: false, error: 'Login failed' };
   }
 };
 
@@ -181,7 +181,7 @@ export const updateUserBudget = async (
     return { success: true };
   } catch (error) {
     console.error('Update budget error:', error);
-    return { success: false, error: 'Gagal update budget' };
+    return { success: false, error: 'Update budget failed' };
   }
 };
 
@@ -194,7 +194,7 @@ export const updateUserPassword = async (
     // Get user to verify current password
     const user = await getDocument<User>('users', userId);
     if (!user) {
-      return { success: false, error: 'User tidak ditemukan' };
+      return { success: false, error: 'User not found' };
     }
 
     // Verify current password
@@ -205,7 +205,7 @@ export const updateUserPassword = async (
     );
 
     if (!isValidPassword) {
-      return { success: false, error: 'Password saat ini salah' };
+      return { success: false, error: 'Current password is incorrect' };
     }
 
     // Hash new password with new salt
@@ -220,7 +220,7 @@ export const updateUserPassword = async (
     return { success: true };
   } catch (error) {
     console.error('Update password error:', error);
-    return { success: false, error: 'Gagal update password' };
+    return { success: false, error: 'Update password failed' };
   }
 };
 
@@ -231,13 +231,13 @@ export const refreshUserSession = async (): Promise<{ success: boolean; user?: U
   try {
     const currentSession = getAuthCookie();
     if (!currentSession) {
-      return { success: false, error: 'Tidak ada sesi aktif' };
+      return { success: false, error: 'No active session' };
     }
 
     const freshUser = await getUserById(currentSession.id);
     if (!freshUser) {
       removeAuthCookie();
-      return { success: false, error: 'User tidak ditemukan' };
+      return { success: false, error: 'User not found' };
     }
 
     const updatedSession: UserSession = {
@@ -250,6 +250,6 @@ export const refreshUserSession = async (): Promise<{ success: boolean; user?: U
     return { success: true, user: updatedSession };
   } catch (error) {
     console.error('Refresh session error:', error);
-    return { success: false, error: 'Gagal refresh sesi' };
+    return { success: false, error: 'Failed to refresh session' };
   }
 };

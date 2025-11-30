@@ -76,12 +76,11 @@ export function RecipeCard({
                     </div>
                 </div>
 
-                {/* Learn More Link */}
                 <Link
                     href={`/recipe/${recipe.id}`}
                     className="flex items-center gap-1 self-end text-sm font-medium text-secondary-foreground md:text-base mt-2 md:mt-3"
                 >
-                    Learn More
+                    Show detail
                     <ChevronRight className="size-5 md:size-6" />
                 </Link>
             </div>
