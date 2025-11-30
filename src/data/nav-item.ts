@@ -13,8 +13,4 @@ export const navItems: NavItem[] = [
         href: "/budget",
         label: "Budget",
     },
-    {
-        href: "/profile",
-        label: "Profile",
-    },
 ];
