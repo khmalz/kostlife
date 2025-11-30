@@ -93,7 +93,7 @@ export function MobileSidebar() {
                             key={link.href}
                             href={link.href}
                             onClick={() => setOpen(false)}
-                            className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-primary-foreground text-lg transition-colors hover:bg-secondary"
+                            className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-primary-foreground text-base transition-colors hover:bg-secondary"
                         >
                             <span className="font-medium">{link.label}</span>
                         </Link>
@@ -107,8 +107,8 @@ export function MobileSidebar() {
                         <LogoutDialog
                             onConfirm={handleLogout}
                             trigger={
-                                <button className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-primary-foreground text-lg transition-colors hover:bg-destructive/20">
-                                    <LogOut className="size-5" />
+                                <button className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-primary-foreground text-base transition-colors hover:bg-destructive/20">
+                                    <LogOut className="size-4" />
                                     <span className="font-medium">Logout</span>
                                 </button>
                             }
@@ -116,9 +116,9 @@ export function MobileSidebar() {
                     ) : (
                         <button
                             onClick={handleLogin}
-                            className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-primary-foreground text-lg transition-colors hover:bg-secondary"
+                            className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-primary-foreground text-base transition-colors hover:bg-secondary"
                         >
-                            <LogIn className="size-5" />
+                            <LogIn className="size-4" />
                             <span className="font-medium">Login</span>
                         </button>
                     )}
