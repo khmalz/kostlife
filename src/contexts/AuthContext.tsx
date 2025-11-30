@@ -16,7 +16,7 @@ import {
     refreshUserSession,
     type SafeUser,
 } from "@/lib/services/auth.service";
-import { type UserSession } from "@/lib/cookies";
+import { setAuthCookie, type UserSession } from "@/lib/cookies";
 
 interface AuthContextType {
     user: UserSession | null;
@@ -33,6 +33,7 @@ interface AuthContextType {
     ) => Promise<{ success: boolean; error?: string }>;
     logout: () => void;
     refreshSession: () => Promise<void>;
+    updateBudget: (newAmount: number) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -123,7 +124,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
                 return {
                     success: false,
-                    error: result.error || "Registrasi failed",
+                    error: result.error || "Registration failed",
                 };
             } catch (error) {
                 console.error("Register error:", error);
@@ -157,6 +158,26 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
     }, []);
 
+    /**
+     * Update budget amount in state and cookie
+     * Used by budget operations to sync UI after transactions
+     */
+    const updateBudget = useCallback((newAmount: number) => {
+        setUser((prev) => {
+            if (!prev) return null;
+
+            const updatedUser: UserSession = {
+                ...prev,
+                amount_budget: newAmount,
+            };
+
+            // Also update cookie
+            setAuthCookie(updatedUser);
+
+            return updatedUser;
+        });
+    }, []);
+
     const value: AuthContextType = {
         user,
         isLoading,
@@ -165,6 +186,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         register,
         logout,
         refreshSession,
+        updateBudget,
     };
 
     return (
@@ -182,4 +204,5 @@ export function useAuth(): AuthContextType {
     return context;
 }
 
+// Export types
 export type { AuthContextType, UserSession, SafeUser };

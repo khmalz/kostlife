@@ -1,361 +1,256 @@
 'use client';
 
 import {
-  addDocument,
-  getDocument,
-  updateDocument,
-  deleteDocument,
-  queryDocuments,
+    getAuthCookie,
+    setAuthCookie,
+    type UserSession,
+} from '@/lib/cookies';
+import {
+    addDocument,
+    deleteDocument,
+    getDocument,
+    updateDocument,
 } from '@/lib/firebase/firestore';
 import type { User } from './auth.service';
+import type { Budget } from './server/budget.service';
 
-// ==================== TYPES ====================
+// Re-export types and read functions from server for convenience
+export {
+    getBudgetById, getBudgetsByDateRange, getBudgetsByType, getBudgetSummary,
+    getMonthlySummary,
+    getRecentBudgets, getUserBudgets
+} from './server/budget.service';
+export type { Budget, BudgetSummary } from './server/budget.service';
 
-export interface Budget {
-  id: string;
-  userId: string; // Relasi ke users
-  type: 'income' | 'expense';
-  budget_at: string; // ISO date string
-  amount: number;
-  description: string;
-  createdAt: string;
+export interface CreateBudgetInput {
+    type: 'income' | 'expense';
+    amount: number;
+    description: string;
+    budget_at?: string; // ISO date string, defaults to now
 }
 
-export interface BudgetWithUser extends Budget {
-  user?: User;
+export interface UpdateBudgetInput {
+    type?: 'income' | 'expense';
+    amount?: number;
+    description?: string;
+    budget_at?: string;
 }
-
-export interface BudgetSummary {
-  totalIncome: number;
-  totalExpense: number;
-  balance: number;
-  currentBudget: number;
-}
-
-// ==================== BUDGET FUNCTIONS ====================
 
 /**
- * Tambah income (pemasukan)
- * Otomatis menambah amount_budget user
+ * Sync user budget amount to cookie
+ */
+const syncBudgetToCookie = (newAmount: number): void => {
+    const currentSession = getAuthCookie();
+    if (currentSession) {
+        const updatedSession: UserSession = {
+            ...currentSession,
+            amount_budget: newAmount,
+        };
+        setAuthCookie(updatedSession);
+    }
+};
+
+/**
+ * Update user's amount_budget in Firestore and sync to cookie
+ */
+const updateUserBudgetAmount = async (
+    userId: string,
+    newAmount: number
+): Promise<void> => {
+    await updateDocument('users', userId, {
+        amount_budget: newAmount,
+        updatedAt: new Date().toISOString(),
+    });
+    syncBudgetToCookie(newAmount);
+};
+
+/**
+ * Add income (pemasukan)
+ * Automatically increases user's amount_budget
  */
 export const addIncome = async (
-  userId: string,
-  amount: number,
-  description: string,
-  budgetAt?: string
-): Promise<{ success: boolean; budgetId?: string; error?: string }> => {
-  try {
-    // Get current user
-    const user = await getDocument<User>('users', userId);
-    if (!user) {
-      return { success: false, error: 'User tidak ditemukan' };
+    userId: string,
+    amount: number,
+    description: string,
+    budgetAt?: string
+): Promise<{ success: boolean; budgetId?: string; newBalance?: number; error?: string }> => {
+    try {
+        // Get current user
+        const user = await getDocument<User>('users', userId);
+        if (!user) {
+            return { success: false, error: 'User tidak ditemukan' };
+        }
+
+        // Add budget record
+        const budgetId = await addDocument('budgets', {
+            userId,
+            type: 'income',
+            budget_at: budgetAt || new Date().toISOString(),
+            amount,
+            description,
+            createdAt: new Date().toISOString(),
+        });
+
+        // Update user budget amount
+        const newBalance = user.amount_budget + amount;
+        await updateUserBudgetAmount(userId, newBalance);
+
+        return { success: true, budgetId, newBalance };
+    } catch (error) {
+        console.error('Add income error:', error);
+        return { success: false, error: 'Gagal menambah pemasukan' };
     }
-
-    // Add budget record
-    const budgetId = await addDocument('budgets', {
-      userId,
-      type: 'income',
-      budget_at: budgetAt || new Date().toISOString(),
-      amount,
-      description,
-      createdAt: new Date().toISOString(),
-    });
-
-    // Update user budget amount
-    const newBudget = user.amount_budget + amount;
-    await updateUserBudget(userId, newBudget);
-
-    return { success: true, budgetId };
-  } catch (error) {
-    console.error('Add income error:', error);
-    return { success: false, error: 'Gagal menambah pemasukan' };
-  }
 };
 
 /**
- * Tambah expense (pengeluaran)
- * Otomatis mengurangi amount_budget user
+ * Add expense (pengeluaran)
+ * Automatically decreases user's amount_budget
  */
 export const addExpense = async (
-  userId: string,
-  amount: number,
-  description: string,
-  budgetAt?: string
-): Promise<{ success: boolean; budgetId?: string; error?: string }> => {
-  try {
-    // Get current user
-    const user = await getDocument<User>('users', userId);
-    if (!user) {
-      return { success: false, error: 'User tidak ditemukan' };
+    userId: string,
+    amount: number,
+    description: string,
+    budgetAt?: string
+): Promise<{ success: boolean; budgetId?: string; newBalance?: number; error?: string }> => {
+    try {
+        // Get current user
+        const user = await getDocument<User>('users', userId);
+        if (!user) {
+            return { success: false, error: 'User tidak ditemukan' };
+        }
+
+        // Check if enough budget
+        if (user.amount_budget < amount) {
+            return { success: false, error: 'Budget tidak cukup' };
+        }
+
+        // Add budget record
+        const budgetId = await addDocument('budgets', {
+            userId,
+            type: 'expense',
+            budget_at: budgetAt || new Date().toISOString(),
+            amount,
+            description,
+            createdAt: new Date().toISOString(),
+        });
+
+        // Update user budget amount
+        const newBalance = user.amount_budget - amount;
+        await updateUserBudgetAmount(userId, newBalance);
+
+        return { success: true, budgetId, newBalance };
+    } catch (error) {
+        console.error('Add expense error:', error);
+        return { success: false, error: 'Gagal menambah pengeluaran' };
     }
+};
 
-    // Check if enough budget
-    if (user.amount_budget < amount) {
-      return { success: false, error: 'Budget tidak cukup' };
+/**
+ * Add budget entry (generic - determines income or expense by type)
+ */
+export const addBudget = async (
+    userId: string,
+    input: CreateBudgetInput
+): Promise<{ success: boolean; budgetId?: string; newBalance?: number; error?: string }> => {
+    if (input.type === 'income') {
+        return addIncome(userId, input.amount, input.description, input.budget_at);
+    } else {
+        return addExpense(userId, input.amount, input.description, input.budget_at);
     }
-
-    // Add budget record
-    const budgetId = await addDocument('budgets', {
-      userId,
-      type: 'expense',
-      budget_at: budgetAt || new Date().toISOString(),
-      amount,
-      description,
-      createdAt: new Date().toISOString(),
-    });
-
-    // Update user budget amount
-    const newBudget = user.amount_budget - amount;
-    await updateUserBudget(userId, newBudget);
-
-    return { success: true, budgetId };
-  } catch (error) {
-    console.error('Add expense error:', error);
-    return { success: false, error: 'Gagal menambah pengeluaran' };
-  }
-};
-
-/**
- * Get all budgets untuk user tertentu
- */
-export const getUserBudgets = async (
-  userId: string,
-  orderBy: 'budget_at' | 'createdAt' = 'budget_at',
-  direction: 'asc' | 'desc' = 'desc',
-  limit?: number
-): Promise<Budget[]> => {
-  try {
-    const budgets = await queryDocuments<Budget>(
-      'budgets',
-      [{ field: 'userId', operator: '==', value: userId }],
-      orderBy,
-      direction,
-      limit
-    );
-
-    return budgets;
-  } catch (error) {
-    console.error('Get budgets error:', error);
-    return [];
-  }
-};
-
-/**
- * Get budgets by type (income/expense)
- */
-export const getBudgetsByType = async (
-  userId: string,
-  type: 'income' | 'expense',
-  limit?: number
-): Promise<Budget[]> => {
-  try {
-    const budgets = await queryDocuments<Budget>(
-      'budgets',
-      [
-        { field: 'userId', operator: '==', value: userId },
-        { field: 'type', operator: '==', value: type },
-      ],
-      'budget_at',
-      'desc',
-      limit
-    );
-
-    return budgets;
-  } catch (error) {
-    console.error('Get budgets by type error:', error);
-    return [];
-  }
-};
-
-/**
- * Get budgets dalam range tanggal
- */
-export const getBudgetsByDateRange = async (
-  userId: string,
-  startDate: string,
-  endDate: string
-): Promise<Budget[]> => {
-  try {
-    const budgets = await queryDocuments<Budget>(
-      'budgets',
-      [
-        { field: 'userId', operator: '==', value: userId },
-        { field: 'budget_at', operator: '>=', value: startDate },
-        { field: 'budget_at', operator: '<=', value: endDate },
-      ],
-      'budget_at',
-      'desc'
-    );
-
-    return budgets;
-  } catch (error) {
-    console.error('Get budgets by date range error:', error);
-    return [];
-  }
-};
-
-/**
- * Get budget summary (total income, expense, balance)
- */
-export const getBudgetSummary = async (userId: string): Promise<BudgetSummary> => {
-  try {
-    const budgets = await getUserBudgets(userId);
-    const user = await getDocument<User>('users', userId);
-
-    const totalIncome = budgets
-      .filter((b) => b.type === 'income')
-      .reduce((sum, b) => sum + b.amount, 0);
-
-    const totalExpense = budgets
-      .filter((b) => b.type === 'expense')
-      .reduce((sum, b) => sum + b.amount, 0);
-
-    const balance = totalIncome - totalExpense;
-    const currentBudget = user?.amount_budget || 0;
-
-    return {
-      totalIncome,
-      totalExpense,
-      balance,
-      currentBudget,
-    };
-  } catch (error) {
-    console.error('Get budget summary error:', error);
-    return {
-      totalIncome: 0,
-      totalExpense: 0,
-      balance: 0,
-      currentBudget: 0,
-    };
-  }
 };
 
 /**
  * Update budget entry
  */
 export const updateBudget = async (
-  budgetId: string,
-  updates: Partial<Budget>
-): Promise<{ success: boolean; error?: string }> => {
-  try {
-    // Get old budget data
-    const oldBudget = await getDocument<Budget>('budgets', budgetId);
-    if (!oldBudget) {
-      return { success: false, error: 'Budget tidak ditemukan' };
+    budgetId: string,
+    updates: UpdateBudgetInput
+): Promise<{ success: boolean; newBalance?: number; error?: string }> => {
+    try {
+        // Get old budget data
+        const oldBudget = await getDocument<Budget>('budgets', budgetId);
+        if (!oldBudget) {
+            return { success: false, error: 'Budget tidak ditemukan' };
+        }
+
+        // Get user
+        const user = await getDocument<User>('users', oldBudget.userId);
+        if (!user) {
+            return { success: false, error: 'User tidak ditemukan' };
+        }
+
+        let newUserBudget = user.amount_budget;
+        const newType = updates.type || oldBudget.type;
+        const newAmount = updates.amount ?? oldBudget.amount;
+
+        // Calculate budget adjustment if amount or type changed
+        if (updates.amount !== undefined || updates.type !== undefined) {
+            // First, reverse the old transaction
+            if (oldBudget.type === 'income') {
+                newUserBudget -= oldBudget.amount;
+            } else {
+                newUserBudget += oldBudget.amount;
+            }
+
+            // Then, apply the new transaction
+            if (newType === 'income') {
+                newUserBudget += newAmount;
+            } else {
+                // Check if enough budget for expense
+                if (newUserBudget < newAmount) {
+                    return { success: false, error: 'Budget tidak cukup untuk perubahan ini' };
+                }
+                newUserBudget -= newAmount;
+            }
+
+            await updateUserBudgetAmount(oldBudget.userId, newUserBudget);
+        }
+
+        await updateDocument('budgets', budgetId, {
+            ...updates,
+            updatedAt: new Date().toISOString(),
+        });
+
+        return { success: true, newBalance: newUserBudget };
+    } catch (error) {
+        console.error('Update budget error:', error);
+        return { success: false, error: 'Gagal update budget' };
     }
-
-    // If amount changed, update user budget
-    if (updates.amount !== undefined && updates.amount !== oldBudget.amount) {
-      const user = await getDocument<User>('users', oldBudget.userId);
-      if (!user) {
-        return { success: false, error: 'User tidak ditemukan' };
-      }
-
-      const difference = updates.amount - oldBudget.amount;
-      const newUserBudget =
-        oldBudget.type === 'income'
-          ? user.amount_budget + difference
-          : user.amount_budget - difference;
-
-      await updateUserBudget(oldBudget.userId, newUserBudget);
-    }
-
-    // Update budget
-    await updateDocument('budgets', budgetId, updates);
-
-    return { success: true };
-  } catch (error) {
-    console.error('Update budget error:', error);
-    return { success: false, error: 'Gagal update budget' };
-  }
 };
 
 /**
  * Delete budget entry
- * Otomatis adjust amount_budget user
+ * Automatically reverses the transaction in user's amount_budget
  */
 export const deleteBudget = async (
-  budgetId: string
-): Promise<{ success: boolean; error?: string }> => {
-  try {
-    // Get budget data
-    const budget = await getDocument<Budget>('budgets', budgetId);
-    if (!budget) {
-      return { success: false, error: 'Budget tidak ditemukan' };
+    budgetId: string
+): Promise<{ success: boolean; newBalance?: number; error?: string }> => {
+    try {
+        // Get budget data
+        const budget = await getDocument<Budget>('budgets', budgetId);
+        if (!budget) {
+            return { success: false, error: 'Budget tidak ditemukan' };
+        }
+
+        // Get user
+        const user = await getDocument<User>('users', budget.userId);
+        if (!user) {
+            return { success: false, error: 'User tidak ditemukan' };
+        }
+
+        // Reverse the transaction
+        const newUserBudget =
+            budget.type === 'income'
+                ? user.amount_budget - budget.amount
+                : user.amount_budget + budget.amount;
+
+        await updateUserBudgetAmount(budget.userId, newUserBudget);
+
+        await deleteDocument('budgets', budgetId);
+
+        return { success: true, newBalance: newUserBudget };
+    } catch (error) {
+        console.error('Delete budget error:', error);
+        return { success: false, error: 'Gagal hapus budget' };
     }
-
-    // Get user
-    const user = await getDocument<User>('users', budget.userId);
-    if (!user) {
-      return { success: false, error: 'User tidak ditemukan' };
-    }
-
-    // Adjust user budget (reverse the transaction)
-    const newUserBudget =
-      budget.type === 'income'
-        ? user.amount_budget - budget.amount
-        : user.amount_budget + budget.amount;
-
-    await updateUserBudget(budget.userId, newUserBudget);
-
-    // Delete budget
-    await deleteDocument('budgets', budgetId);
-
-    return { success: true };
-  } catch (error) {
-    console.error('Delete budget error:', error);
-    return { success: false, error: 'Gagal hapus budget' };
-  }
 };
-
-/**
- * Get monthly summary (per bulan)
- */
-export const getMonthlySummary = async (
-  userId: string,
-  year: number,
-  month: number // 1-12
-): Promise<BudgetSummary> => {
-  try {
-    // Get start and end of month
-    const startDate = new Date(year, month - 1, 1).toISOString();
-    const endDate = new Date(year, month, 0, 23, 59, 59).toISOString();
-
-    const budgets = await getBudgetsByDateRange(userId, startDate, endDate);
-
-    const totalIncome = budgets
-      .filter((b) => b.type === 'income')
-      .reduce((sum, b) => sum + b.amount, 0);
-
-    const totalExpense = budgets
-      .filter((b) => b.type === 'expense')
-      .reduce((sum, b) => sum + b.amount, 0);
-
-    const balance = totalIncome - totalExpense;
-
-    const user = await getDocument<User>('users', userId);
-    const currentBudget = user?.amount_budget || 0;
-
-    return {
-      totalIncome,
-      totalExpense,
-      balance,
-      currentBudget,
-    };
-  } catch (error) {
-    console.error('Get monthly summary error:', error);
-    return {
-      totalIncome: 0,
-      totalExpense: 0,
-      balance: 0,
-      currentBudget: 0,
-    };
-  }
-};
-
-/**
- * Update user budget amount (delegated to auth.service)
- * This is a stub to avoid breaking existing code, but should be imported from auth.service
- */
-import { updateUserBudget } from './auth.service';
-export { updateUserBudget };
