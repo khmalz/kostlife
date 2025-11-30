@@ -6,10 +6,6 @@ export const navItems: NavItem[] = [
         label: "Recipe",
     },
     {
-        href: "/favorite",
-        label: "Favorite",
-    },
-    {
         href: "/budget",
         label: "Budget",
     },

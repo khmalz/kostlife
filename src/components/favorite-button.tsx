@@ -1,7 +1,7 @@
 "use client";
 
 import { Heart } from "lucide-react";
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { toggleFavorite } from "@/lib/services/favorite.service";
@@ -25,12 +25,14 @@ export function FavoriteButton({
     const [isFavorited, setIsFavorited] = useState(initialFavorited);
     const [isPending, startTransition] = useTransition();
 
+    useEffect(() => {
+        setIsFavorited(initialFavorited);
+    }, [initialFavorited]);
+
     const handleClick = async (e: React.MouseEvent) => {
-        // Prevent event bubbling (e.g., if inside a link)
         e.preventDefault();
         e.stopPropagation();
 
-        // Safety check (should not happen since button is hidden for unauthenticated users)
         if (!user) {
             return;
         }

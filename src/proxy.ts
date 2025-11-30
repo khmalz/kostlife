@@ -7,7 +7,6 @@ const AUTH_COOKIE_NAME = 'kostlife_auth';
 // Routes that require authentication
 const PROTECTED_ROUTES = [
   '/wallet',
-  '/favorites',
   '/profile',
 ];
 

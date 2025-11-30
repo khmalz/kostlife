@@ -10,7 +10,6 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { getFavoriteRecipeIds } from "@/lib/services/favorite.service";
 import type { RecipeWithImageURL } from "@/lib/services/server/recipe.service";
 import { Heart } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
@@ -28,6 +27,7 @@ export default function RecipePage({
 
     const [searchQuery, setSearchQuery] = useState("");
     const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
+    const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
 
     const debouncedSearch = useDebounce(searchQuery, 300);
 
@@ -35,6 +35,7 @@ export default function RecipePage({
         const fetchFavorites = async () => {
             if (!isAuthenticated || !user) {
                 setFavoriteIds([]);
+                setShowFavoritesOnly(false);
                 return;
             }
 
@@ -68,11 +69,28 @@ export default function RecipePage({
         logout();
     };
 
+    const toggleFavoriteFilter = () => {
+        if (!isAuthenticated) {
+            router.push("/auth/login");
+            return;
+        }
+        setShowFavoritesOnly((prev) => !prev);
+    };
+
     const filteredRecipes = useMemo(() => {
-        return initialRecipes.filter((recipe) =>
+        let recipes = initialRecipes.filter((recipe) =>
             recipe.title.toLowerCase().includes(debouncedSearch.toLowerCase()),
         );
-    }, [initialRecipes, debouncedSearch]);
+
+        // Filter by favorites if toggle is active
+        if (showFavoritesOnly) {
+            recipes = recipes.filter((recipe) =>
+                favoriteIds.includes(recipe.id),
+            );
+        }
+
+        return recipes;
+    }, [initialRecipes, debouncedSearch, showFavoritesOnly, favoriteIds]);
 
     return (
         <div className="min-h-screen bg-secondary">
@@ -102,18 +120,24 @@ export default function RecipePage({
                         value={searchQuery}
                         onChange={setSearchQuery}
                     />
-                    {isAuthenticated ? (
-                        <button className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground hover:bg-primary/80 transition-colors">
-                            <Heart className="size-4" />
-                        </button>
-                    ) : (
-                        <Link
-                            href="/auth/login"
-                            className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/50 text-primary-foreground hover:bg-primary/70 transition-colors"
-                            title="Login untuk akses favorit"
+                    {isAuthenticated && (
+                        <button
+                            onClick={toggleFavoriteFilter}
+                            className={`flex size-10 shrink-0 items-center justify-center rounded-full transition-colors ${
+                                showFavoritesOnly
+                                    ? "bg-primary text-primary-foreground"
+                                    : "bg-primary/50 text-primary-foreground hover:bg-primary/70"
+                            }`}
+                            title={
+                                showFavoritesOnly
+                                    ? "Tampilkan semua resep"
+                                    : "Tampilkan favorit saja"
+                            }
                         >
-                            <Heart className="size-4" />
-                        </Link>
+                            <Heart
+                                className={`size-4 ${showFavoritesOnly ? "fill-current" : ""}`}
+                            />
+                        </button>
                     )}
                 </div>
 
@@ -126,11 +150,33 @@ export default function RecipePage({
                 )}
 
                 <section>
-                    <h2 className="mb-4 text-xl font-bold text-primary-foreground md:text-2xl md:mb-6">
-                        Discover
-                        <br />
-                        New Recipe
-                    </h2>
+                    <div className="mb-4 flex items-start justify-between md:mb-6 md:block">
+                        <h2 className="text-xl font-bold text-primary-foreground md:text-2xl">
+                            {showFavoritesOnly ? "My Favorites" : "Discover"}
+                            <br />
+                            {showFavoritesOnly ? "Recipes" : "New Recipe"}
+                        </h2>
+
+                        {isAuthenticated && (
+                            <button
+                                onClick={toggleFavoriteFilter}
+                                className={`md:hidden flex size-12 shrink-0 items-center justify-center rounded-full transition-colors ${
+                                    showFavoritesOnly
+                                        ? "bg-primary text-primary-foreground"
+                                        : "bg-primary/50 text-primary-foreground"
+                                }`}
+                                title={
+                                    showFavoritesOnly
+                                        ? "Tampilkan semua resep"
+                                        : "Tampilkan favorit saja"
+                                }
+                            >
+                                <Heart
+                                    className={`size-5 ${showFavoritesOnly ? "fill-current" : ""}`}
+                                />
+                            </button>
+                        )}
+                    </div>
 
                     {initialError && (
                         <p className="text-center text-red-400">
@@ -158,7 +204,9 @@ export default function RecipePage({
 
                     {!initialError && filteredRecipes.length === 0 && (
                         <p className="text-center text-primary-foreground/60">
-                            Resep tidak ditemukan.
+                            {showFavoritesOnly
+                                ? "Belum ada resep favorit."
+                                : "Resep tidak ditemukan."}
                         </p>
                     )}
                 </section>
