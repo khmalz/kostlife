@@ -1,89 +1,134 @@
 "use client";
 
-import { useMemo } from "react";
 import { Navbar } from "@/components/navbar";
-import { MobileSidebar } from "@/components/mobile-sidebar";
+import type { Transaction } from "@/components/transaction-card";
 import { TransactionForm } from "@/components/transaction-form";
 import { useAuth } from "@/hooks/useAuth";
-import { useRouter, useParams } from "next/navigation";
-import type { Transaction } from "@/components/transaction-card";
+import { getBudgetById, updateBudget } from "@/lib/services/budget.service";
+import type { Budget } from "@/types/budgets";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
-// TODO: This will be replaced with actual data from Firebase
-const DUMMY_TRANSACTIONS: Transaction[] = [
-    {
-        id: "1",
-        type: "income",
-        amount: 20000,
-        description: "Beli Bahan Masakan",
-        date: new Date("2025-12-03"),
-    },
-    {
-        id: "2",
-        type: "expense",
-        amount: 30000,
-        description: "Kebutuhan Kuliah",
-        date: new Date("2025-11-28"),
-    },
-    {
-        id: "3",
-        type: "expense",
-        amount: 5000,
-        description: "Jajan Siang",
-        date: new Date("2025-11-25"),
-    },
-    {
-        id: "4",
-        type: "income",
-        amount: 50000,
-        description: "Transfer dari Orang Tua",
-        date: new Date("2025-11-20"),
-    },
-    {
-        id: "5",
-        type: "expense",
-        amount: 15000,
-        description: "Beli Pulsa",
-        date: new Date("2025-11-18"),
-    },
-];
+function budgetToTransaction(budget: Budget): Transaction {
+    return {
+        id: budget.id,
+        type: budget.type,
+        amount: budget.amount,
+        description: budget.description,
+        date: new Date(budget.budget_at),
+    };
+}
 
 export default function EditTransactionPage() {
     const router = useRouter();
     const params = useParams();
-    const { user, isAuthenticated, isLoading, logout } = useAuth();
+    const { user, isAuthenticated, isLoading: authLoading, logout } = useAuth();
 
-    // Use useMemo to derive transaction from params - no setState needed
-    const transaction = useMemo(() => {
-        const id = params.id as string;
-        return DUMMY_TRANSACTIONS.find((t) => t.id === id) ?? null;
-    }, [params.id]);
+    const [transaction, setTransaction] = useState<Transaction | null>(null);
+    const [isLoadingData, setIsLoadingData] = useState(true);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const budgetId = params.id as string;
+
+    useEffect(() => {
+        async function fetchBudget() {
+            if (!budgetId) return;
+
+            setIsLoadingData(true);
+            setError(null);
+
+            try {
+                const budget = await getBudgetById(budgetId);
+
+                if (budget) {
+                    setTransaction(budgetToTransaction(budget));
+                } else {
+                    setError("Transaction not found");
+                }
+            } catch (err) {
+                console.error("Error fetching budget:", err);
+                setError("Failed to load transaction");
+            } finally {
+                setIsLoadingData(false);
+            }
+        }
+
+        fetchBudget();
+    }, [budgetId]);
 
     const handleLogout = () => {
         logout();
         router.push("/auth/login");
     };
 
-    const handleSubmit = (data: Omit<Transaction, "id">) => {
-        // TODO: Integrate with Firebase to update transaction
-        console.log("Updated transaction:", { id: params.id, ...data });
+    const handleSubmit = async (data: Omit<Transaction, "id">) => {
+        if (!budgetId) {
+            toast.error("ID transaksi tidak ditemukan");
+            return;
+        }
 
-        // For now, just redirect back to budget page
-        router.push("/budget");
+        setIsSubmitting(true);
+
+        try {
+            const result = await updateBudget(budgetId, {
+                type: data.type,
+                amount: data.amount,
+                description: data.description,
+                budget_at: data.date.toISOString(),
+            });
+
+            if (result.success) {
+                toast.success("Transaksi berhasil diperbarui");
+                router.push("/budget");
+            } else {
+                toast.error(result.error || "Gagal memperbarui transaksi");
+            }
+        } catch (error) {
+            console.error("Error updating transaction:", error);
+            toast.error("Terjadi kesalahan. Silakan coba lagi.");
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
-    if (!transaction) {
+    // Loading state
+    if (isLoadingData) {
         return (
             <div className="min-h-screen bg-secondary">
                 <Navbar
                     isLoggedIn={isAuthenticated}
-                    isLoading={isLoading}
+                    isLoading={authLoading}
+                    username={user?.username}
+                    onLogout={handleLogout}
+                />
+                <div className="mx-auto max-w-md px-4 py-6 md:max-w-6xl md:px-8 md:py-10">
+                    <div className="flex flex-col items-center justify-center py-20 gap-4">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-foreground"></div>
+                        <p className="text-primary-foreground/60">
+                            Loading transaction...
+                        </p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Error or not found state
+    if (error || !transaction) {
+        return (
+            <div className="min-h-screen bg-secondary">
+                <Navbar
+                    isLoggedIn={isAuthenticated}
+                    isLoading={authLoading}
                     username={user?.username}
                     onLogout={handleLogout}
                 />
                 <div className="mx-auto max-w-md px-4 py-6 md:max-w-6xl md:px-8 md:py-10">
                     <div className="flex flex-col items-center justify-center py-20 gap-4">
                         <p className="text-primary-foreground/60">
-                            Transaction not found.
+                            {error || "Transaction not found."}
                         </p>
                         <button
                             onClick={() => router.push("/budget")}
@@ -99,27 +144,20 @@ export default function EditTransactionPage() {
 
     return (
         <div className="min-h-screen bg-secondary">
-            {/* Desktop Navbar */}
             <Navbar
                 isLoggedIn={isAuthenticated}
-                isLoading={isLoading}
+                isLoading={authLoading}
                 username={user?.username}
                 onLogout={handleLogout}
             />
 
-            {/* Main Content */}
-            <div className="mx-auto max-w-md px-4 py-6 md:max-w-6xl md:px-8 md:py-10">
-                {/* Mobile Header - just hamburger menu */}
-                <header className="mb-6 flex items-center md:hidden">
-                    <MobileSidebar />
-                </header>
-
-                {/* Transaction Form - use key to reset form when transaction changes */}
+            <div className="mx-auto max-w-md md:max-w-6xl md:px-8 md:py-10">
                 <TransactionForm
                     key={transaction.id}
                     mode="edit"
                     initialData={transaction}
                     onSubmit={handleSubmit}
+                    isLoading={isSubmitting}
                 />
             </div>
         </div>
