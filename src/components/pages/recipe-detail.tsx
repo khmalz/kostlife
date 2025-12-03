@@ -56,7 +56,7 @@ export default function RecipeDetailClient({
                     <ArrowLeft className="size-6" />
                 </button>
                 <h1 className="text-xl font-semibold text-primary-foreground">
-                    Recipe
+                    Resep
                 </h1>
             </header>
 
@@ -115,7 +115,7 @@ export default function RecipeDetailClient({
                         <section className="mb-6 md:mb-8">
                             <div className="inline-block bg-secondary px-4 py-2 rounded-lg mb-4">
                                 <h3 className="text-sm font-semibold text-primary-foreground md:text-base">
-                                    Ingredients & Tools
+                                    Bahan & Alat
                                 </h3>
                             </div>
                             <ul className="list-disc list-inside space-y-1.5 text-primary-foreground/90 md:space-y-2">
@@ -133,7 +133,7 @@ export default function RecipeDetailClient({
                         <section>
                             <div className="inline-block bg-secondary px-4 py-2 rounded-lg mb-4">
                                 <h3 className="text-sm font-semibold text-primary-foreground md:text-base">
-                                    Instruction
+                                    Instruksi
                                 </h3>
                             </div>
                             <ol className="list-decimal list-inside space-y-2 text-primary-foreground/90 md:space-y-3">

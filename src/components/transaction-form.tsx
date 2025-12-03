@@ -81,7 +81,7 @@ export function TransactionForm({
                     <ArrowLeft className="size-6" />
                 </button>
                 <h1 className="text-xl font-semibold text-primary-foreground">
-                    {mode === "add" ? "Add Transaction" : "Edit Transaction"}
+                    {mode === "add" ? "Tambah Transaksi" : "Update Transaksi"}
                 </h1>
             </header>
 
@@ -91,18 +91,21 @@ export function TransactionForm({
                     className="flex items-center gap-2 text-primary-foreground hover:text-primary-foreground/80 transition-colors"
                 >
                     <ArrowLeft className="size-5" />
-                    <span className="font-medium">Back</span>
+                    <span className="font-medium">Kembali</span>
                 </button>
-                <h1 className="flex-1 text-center text-xl md:text-2xl font-bold text-primary-foreground pr-16">
-                    {mode === "add" ? "Add Transaction" : "Edit Transaction"}
-                </h1>
             </div>
 
             <div className="mx-auto max-w-md">
-                <div className="rounded-2xl border-2 border-primary/30 bg-secondary/50 p-6">
+                <div className="rounded-2xl border-2 border-primary/30 bg-secondary/50">
+                    <h1 className="hidden md:block text-center text-xl md:text-2xl font-bold text-primary-foreground py-3">
+                        {mode === "add"
+                            ? "Tambah Transaksi"
+                            : "Update Transaksi"}
+                    </h1>
+
                     <form
                         onSubmit={handleSubmit}
-                        className="flex flex-col gap-4"
+                        className="flex flex-col gap-4 p-6"
                     >
                         <Select
                             value={category}
@@ -111,7 +114,7 @@ export function TransactionForm({
                             }
                         >
                             <SelectTrigger className="w-full h-11 rounded-full bg-background border-0 text-foreground px-4">
-                                <SelectValue placeholder="Transaction Category" />
+                                <SelectValue placeholder="Kategori Transaksi" />
                             </SelectTrigger>
                             <SelectContent className="bg-background!">
                                 <SelectItem
@@ -130,7 +133,7 @@ export function TransactionForm({
                         </Select>
 
                         <CurrencyInput
-                            placeholder="Transaction Nominee"
+                            placeholder="Nominal Transaksi"
                             value={amount}
                             onChange={setAmount}
                             className="h-11 rounded-full bg-background border-0 text-foreground px-4 py-0 shadow-none placeholder:text-foreground/60"
@@ -139,13 +142,13 @@ export function TransactionForm({
                         <DatePicker
                             date={date}
                             onDateChange={setDate}
-                            placeholder="Transaction Date"
+                            placeholder="Tanggal Transaksi"
                             className="h-11 rounded-full bg-background border-0 text-foreground px-4"
                         />
 
                         <Input
                             type="text"
-                            placeholder="Transaction Description"
+                            placeholder="Deskripsi Transaksi"
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                             className="h-11 rounded-full bg-background border-0 text-foreground px-4 py-0 shadow-none placeholder:text-foreground/60"
@@ -157,10 +160,10 @@ export function TransactionForm({
                             className="h-11 rounded-full bg-primary text-primary-foreground font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
                         >
                             {isLoading
-                                ? "Processing..."
+                                ? "Memproses..."
                                 : mode === "add"
-                                  ? "Add Transaction"
-                                  : "Update Transaction"}
+                                  ? "Tambah Transaksi"
+                                  : "Update Transaksi"}
                         </Button>
                     </form>
                 </div>

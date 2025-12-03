@@ -4,18 +4,20 @@
  * @returns Hashed password as hex string
  */
 export async function hashPassword(password: string): Promise<string> {
-  // Encode password as UTF-8
-  const encoder = new TextEncoder();
-  const data = encoder.encode(password);
+    // Encode password as UTF-8
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
 
-  // Hash using SHA-256
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    // Hash using SHA-256
+    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
 
-  // Convert to hex string
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    // Convert to hex string
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
 
-  return hashHex;
+    return hashHex;
 }
 
 /**
@@ -24,9 +26,12 @@ export async function hashPassword(password: string): Promise<string> {
  * @param hash - Hashed password to compare against
  * @returns True if password matches hash
  */
-export async function verifyPassword(password: string, hash: string): Promise<boolean> {
-  const passwordHash = await hashPassword(password);
-  return passwordHash === hash;
+export async function verifyPassword(
+    password: string,
+    hash: string,
+): Promise<boolean> {
+    const passwordHash = await hashPassword(password);
+    return passwordHash === hash;
 }
 
 /**
@@ -36,16 +41,16 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
  * @returns Object containing the hash and salt
  */
 export async function hashPasswordWithSalt(
-  password: string,
-  salt?: string
+    password: string,
+    salt?: string,
 ): Promise<{ hash: string; salt: string }> {
-  const useSalt = salt || generateSalt();
+    const useSalt = salt || generateSalt();
 
-  const saltedPassword = password + useSalt;
+    const saltedPassword = password + useSalt;
 
-  const hash = await hashPassword(saltedPassword);
+    const hash = await hashPassword(saltedPassword);
 
-  return { hash, salt: useSalt };
+    return { hash, salt: useSalt };
 }
 
 /**
@@ -56,12 +61,12 @@ export async function hashPasswordWithSalt(
  * @returns True if password matches hash
  */
 export async function verifyPasswordWithSalt(
-  password: string,
-  hash: string,
-  salt: string
+    password: string,
+    hash: string,
+    salt: string,
 ): Promise<boolean> {
-  const { hash: passwordHash } = await hashPasswordWithSalt(password, salt);
-  return passwordHash === hash;
+    const { hash: passwordHash } = await hashPasswordWithSalt(password, salt);
+    return passwordHash === hash;
 }
 
 /**
@@ -70,7 +75,9 @@ export async function verifyPasswordWithSalt(
  * @returns Salt as hex string
  */
 export function generateSalt(length: number = 16): string {
-  const array = new Uint8Array(length);
-  crypto.getRandomValues(array);
-  return Array.from(array).map(b => b.toString(16).padStart(2, '0')).join('');
+    const array = new Uint8Array(length);
+    crypto.getRandomValues(array);
+    return Array.from(array)
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
 }

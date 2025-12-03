@@ -3,6 +3,9 @@
     //
     // For a full list of overridable settings, and general information on folder-specific settings,//zed.dev/docs/configuring-zed#settings-files
     "project_name": "kostlife",
+    "prettier": {
+        "allowed": true
+    },
     "languages": {
         "JavaScript": {
             "format_on_save": "on",

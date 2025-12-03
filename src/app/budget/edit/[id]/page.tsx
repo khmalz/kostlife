@@ -45,7 +45,7 @@ export default function EditTransactionPage() {
                 if (budget) {
                     setTransaction(budgetToTransaction(budget));
                 } else {
-                    setError("Transaction not found");
+                    setError("Transaksi tidak ditemukan");
                 }
             } catch (err) {
                 console.error("Error fetching budget:", err);
@@ -107,7 +107,7 @@ export default function EditTransactionPage() {
                     <div className="flex flex-col items-center justify-center py-20 gap-4">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-foreground"></div>
                         <p className="text-primary-foreground/60">
-                            Loading transaction...
+                            Memuat transaksi...
                         </p>
                     </div>
                 </div>
@@ -128,13 +128,13 @@ export default function EditTransactionPage() {
                 <div className="mx-auto max-w-md px-4 py-6 md:max-w-6xl md:px-8 md:py-10">
                     <div className="flex flex-col items-center justify-center py-20 gap-4">
                         <p className="text-primary-foreground/60">
-                            {error || "Transaction not found."}
+                            {error || "Transaksi tidak ditemukan."}
                         </p>
                         <button
                             onClick={() => router.push("/budget")}
                             className="text-primary-foreground underline hover:no-underline"
                         >
-                            Back to Budget
+                            Kembali ke Halaman Budget
                         </button>
                     </div>
                 </div>

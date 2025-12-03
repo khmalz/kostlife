@@ -47,7 +47,11 @@ export function Navbar({
                                     href={link.href}
                                     className={cn(
                                         "text-base font-medium transition-colors hover:text-primary-foreground",
-                                        pathname === link.href
+                                        pathname === link.href ||
+                                            (link.href !== "/" &&
+                                                pathname.startsWith(
+                                                    link.href + "/",
+                                                ))
                                             ? "text-primary-foreground"
                                             : "text-primary-foreground/70",
                                     )}

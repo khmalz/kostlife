@@ -18,16 +18,16 @@ export function RegisterForm() {
 
     const validate = () => {
         if (!username.trim() || !password || !confirm) {
-            return "Please fill in all fields.";
+            return "Tolong isi semua kolom.";
         }
         if (username.trim().length < 3) {
-            return "Username must be at least 3 characters.";
+            return "Username harus memiliki minimal 3 karakter.";
         }
         if (password !== confirm) {
-            return "Passwords do not match.";
+            return "Passwords tidak cocok.";
         }
         if (password.length < 6) {
-            return "Password must be at least 6 characters.";
+            return "Password harus memiliki minimal 6 karakter.";
         }
         return null;
     };
@@ -47,13 +47,11 @@ export function RegisterForm() {
             if (result.success) {
                 router.push("/recipe");
             } else {
-                setErrors(
-                    result.error || "Registration failed. Please try again.",
-                );
+                setErrors(result.error || "Register gagal. Silakan coba lagi.");
             }
         } catch (error) {
             console.error("Register error:", error);
-            setErrors("An error occurred. Please try again.");
+            setErrors("Terjadi kesalahan. Silakan coba lagi.");
         } finally {
             setIsSubmitting(false);
         }
@@ -151,7 +149,7 @@ export function RegisterForm() {
 
                 <div className="relative">
                     <label htmlFor="confirm" className="sr-only">
-                        Confirm Password
+                        Konfirmasi Password
                     </label>
                     <input
                         id="confirm"
@@ -159,7 +157,7 @@ export function RegisterForm() {
                         type={showPassword ? "text" : "password"}
                         value={confirm}
                         onChange={(e) => setConfirm(e.target.value)}
-                        placeholder="Confirm Password"
+                        placeholder="Konfirmasi Password"
                         disabled={isLoading}
                         className="w-full py-3 px-5 pr-12 rounded-full text-sm font-medium bg-accent text-accent-foreground placeholder:text-accent-foreground/70 border-0 focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50 disabled:cursor-not-allowed"
                         autoComplete="new-password"
@@ -237,7 +235,7 @@ export function RegisterForm() {
                 </div>
 
                 <div className="text-center text-sm text-secondary-foreground/80 pt-1">
-                    Already have an account?{" "}
+                    Sudah punya akun?{" "}
                     <Link
                         href="/auth/login"
                         className="underline font-medium hover:text-background transition-colors"

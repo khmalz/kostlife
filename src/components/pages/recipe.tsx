@@ -108,7 +108,7 @@ export default function RecipePage({
                 <header className="mb-6 flex items-center gap-3 md:hidden">
                     <MobileSidebar />
                     <SearchBar
-                        placeholder="Search recipe..."
+                        placeholder="Cari resep..."
                         value={searchQuery}
                         onChange={setSearchQuery}
                     />
@@ -116,7 +116,7 @@ export default function RecipePage({
 
                 <div className="hidden md:flex md:items-center md:justify-center md:gap-4 md:mb-8 md:max-w-lg md:mx-auto">
                     <SearchBar
-                        placeholder="Search recipe..."
+                        placeholder="Cari resep..."
                         value={searchQuery}
                         onChange={setSearchQuery}
                     />
@@ -130,8 +130,8 @@ export default function RecipePage({
                             }`}
                             title={
                                 showFavoritesOnly
-                                    ? "Show all recipes"
-                                    : "Show favorites only"
+                                    ? "Tampilkan semua resep"
+                                    : "Tampilkan favorit saja"
                             }
                         >
                             <Heart
@@ -152,9 +152,9 @@ export default function RecipePage({
                 <section>
                     <div className="mb-4 flex items-start justify-between md:mb-6 md:block">
                         <h2 className="text-xl font-bold text-primary-foreground md:text-2xl">
-                            {showFavoritesOnly ? "My Favorites" : "Discover"}
+                            {showFavoritesOnly ? "Favorit Saya" : "Temukan"}
                             <br />
-                            {showFavoritesOnly ? "Recipes" : "New Recipe"}
+                            {showFavoritesOnly ? "Resep" : "Resep Baru"}
                         </h2>
 
                         {isAuthenticated && (
@@ -167,8 +167,8 @@ export default function RecipePage({
                                 }`}
                                 title={
                                     showFavoritesOnly
-                                        ? "Show all recipes"
-                                        : "Show favorites only"
+                                        ? "Tampilkan semua resep"
+                                        : "Tampilkan favorit saja"
                                 }
                             >
                                 <Heart
@@ -205,8 +205,8 @@ export default function RecipePage({
                     {!initialError && filteredRecipes.length === 0 && (
                         <p className="text-center text-primary-foreground/60">
                             {showFavoritesOnly
-                                ? "No favorite recipes."
-                                : "No recipes found."}
+                                ? "Tidak ada resep favorit."
+                                : "Resep tidak ditemukan."}
                         </p>
                     )}
                 </section>

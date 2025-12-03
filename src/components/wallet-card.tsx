@@ -22,10 +22,10 @@ export function WalletCard({ balance, onAddTransaction }: WalletCardProps) {
                 </div>
                 <div>
                     <p className="text-base text-primary-foreground/80">
-                        Balance
+                        Saldo
                     </p>
                     <p className="text-2xl font-bold text-primary-foreground">
-                        IDR {formattedBalance}
+                        Rp {formattedBalance}
                     </p>
                 </div>
             </div>
@@ -35,11 +35,11 @@ export function WalletCard({ balance, onAddTransaction }: WalletCardProps) {
                 className="flex flex-col items-center gap-1 text-primary-foreground hover:text-primary-foreground/80 transition-colors"
                 aria-label="Add transaction"
             >
-                <PlusCircle className="size-8" />
+                <PlusCircle className="size-6 md:size-8" />
                 <span className="text-xs font-medium text-center leading-tight">
-                    Add
+                    Tambah
                     <br />
-                    Transaction
+                    Transaksi
                 </span>
             </button>
         </div>

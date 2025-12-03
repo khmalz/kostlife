@@ -1,32 +1,28 @@
-'use client';
+"use client";
 
-import {
-    getAuthCookie,
-    setAuthCookie,
-    type UserSession,
-} from '@/lib/cookies';
+import { getAuthCookie, setAuthCookie, type UserSession } from "@/lib/cookies";
 import {
     addDocument,
     deleteDocument,
     getDocument,
     queryDocuments,
     updateDocument,
-} from '@/lib/firebase/firestore';
-import type { Budget, BudgetSummary } from '@/types/budgets';
-import type { User } from './auth.service';
+} from "@/lib/firebase/firestore";
+import type { Budget, BudgetSummary } from "@/types/budgets";
+import type { User } from "./auth.service";
 
 // Re-export types for convenience
-export type { Budget, BudgetSummary } from '@/types/budgets';
+export type { Budget, BudgetSummary } from "@/types/budgets";
 
 export interface CreateBudgetInput {
-    type: 'income' | 'expense';
+    type: "income" | "expense";
     amount: number;
     description: string;
     budget_at?: string; // ISO date string, defaults to now
 }
 
 export interface UpdateBudgetInput {
-    type?: 'income' | 'expense';
+    type?: "income" | "expense";
     amount?: number;
     description?: string;
     budget_at?: string;
@@ -35,12 +31,14 @@ export interface UpdateBudgetInput {
 /**
  * Get single budget by ID
  */
-export const getBudgetById = async (budgetId: string): Promise<Budget | null> => {
+export const getBudgetById = async (
+    budgetId: string,
+): Promise<Budget | null> => {
     try {
-        const budget = await getDocument<Budget>('budgets', budgetId);
+        const budget = await getDocument<Budget>("budgets", budgetId);
         return budget;
     } catch (error) {
-        console.error('Get budget error:', error);
+        console.error("Get budget error:", error);
         return null;
     }
 };
@@ -50,22 +48,22 @@ export const getBudgetById = async (budgetId: string): Promise<Budget | null> =>
  */
 export const getUserBudgets = async (
     userId: string,
-    orderByField: 'budget_at' | 'createdAt' = 'budget_at',
-    direction: 'asc' | 'desc' = 'desc',
-    limitCount?: number
+    orderByField: "budget_at" | "createdAt" = "budget_at",
+    direction: "asc" | "desc" = "desc",
+    limitCount?: number,
 ): Promise<Budget[]> => {
     try {
         const budgets = await queryDocuments<Budget>(
-            'budgets',
-            [{ field: 'userId', operator: '==', value: userId }],
+            "budgets",
+            [{ field: "userId", operator: "==", value: userId }],
             orderByField,
             direction,
-            limitCount
+            limitCount,
         );
 
         return budgets;
     } catch (error) {
-        console.error('Get user budgets error:', error);
+        console.error("Get user budgets error:", error);
         return [];
     }
 };
@@ -75,24 +73,24 @@ export const getUserBudgets = async (
  */
 export const getBudgetsByType = async (
     userId: string,
-    type: 'income' | 'expense',
-    limitCount?: number
+    type: "income" | "expense",
+    limitCount?: number,
 ): Promise<Budget[]> => {
     try {
         const budgets = await queryDocuments<Budget>(
-            'budgets',
+            "budgets",
             [
-                { field: 'userId', operator: '==', value: userId },
-                { field: 'type', operator: '==', value: type },
+                { field: "userId", operator: "==", value: userId },
+                { field: "type", operator: "==", value: type },
             ],
-            'budget_at',
-            'desc',
-            limitCount
+            "budget_at",
+            "desc",
+            limitCount,
         );
 
         return budgets;
     } catch (error) {
-        console.error('Get budgets by type error:', error);
+        console.error("Get budgets by type error:", error);
         return [];
     }
 };
@@ -103,23 +101,23 @@ export const getBudgetsByType = async (
 export const getBudgetsByDateRange = async (
     userId: string,
     startDate: string,
-    endDate: string
+    endDate: string,
 ): Promise<Budget[]> => {
     try {
         const budgets = await queryDocuments<Budget>(
-            'budgets',
+            "budgets",
             [
-                { field: 'userId', operator: '==', value: userId },
-                { field: 'budget_at', operator: '>=', value: startDate },
-                { field: 'budget_at', operator: '<=', value: endDate },
+                { field: "userId", operator: "==", value: userId },
+                { field: "budget_at", operator: ">=", value: startDate },
+                { field: "budget_at", operator: "<=", value: endDate },
             ],
-            'budget_at',
-            'desc'
+            "budget_at",
+            "desc",
         );
 
         return budgets;
     } catch (error) {
-        console.error('Get budgets by date range error:', error);
+        console.error("Get budgets by date range error:", error);
         return [];
     }
 };
@@ -129,17 +127,17 @@ export const getBudgetsByDateRange = async (
  */
 export const getBudgetSummary = async (
     userId: string,
-    currentUserBudget: number = 0
+    currentUserBudget: number = 0,
 ): Promise<BudgetSummary> => {
     try {
         const budgets = await getUserBudgets(userId);
 
         const totalIncome = budgets
-            .filter((b) => b.type === 'income')
+            .filter((b) => b.type === "income")
             .reduce((sum, b) => sum + b.amount, 0);
 
         const totalExpense = budgets
-            .filter((b) => b.type === 'expense')
+            .filter((b) => b.type === "expense")
             .reduce((sum, b) => sum + b.amount, 0);
 
         const balance = totalIncome - totalExpense;
@@ -151,7 +149,7 @@ export const getBudgetSummary = async (
             currentBudget: currentUserBudget,
         };
     } catch (error) {
-        console.error('Get budget summary error:', error);
+        console.error("Get budget summary error:", error);
         return {
             totalIncome: 0,
             totalExpense: 0,
@@ -168,7 +166,7 @@ export const getMonthlySummary = async (
     userId: string,
     year: number,
     month: number, // 1-12
-    currentUserBudget: number = 0
+    currentUserBudget: number = 0,
 ): Promise<BudgetSummary> => {
     try {
         const startDate = new Date(year, month - 1, 1).toISOString();
@@ -177,11 +175,11 @@ export const getMonthlySummary = async (
         const budgets = await getBudgetsByDateRange(userId, startDate, endDate);
 
         const totalIncome = budgets
-            .filter((b) => b.type === 'income')
+            .filter((b) => b.type === "income")
             .reduce((sum, b) => sum + b.amount, 0);
 
         const totalExpense = budgets
-            .filter((b) => b.type === 'expense')
+            .filter((b) => b.type === "expense")
             .reduce((sum, b) => sum + b.amount, 0);
 
         const balance = totalIncome - totalExpense;
@@ -193,7 +191,7 @@ export const getMonthlySummary = async (
             currentBudget: currentUserBudget,
         };
     } catch (error) {
-        console.error('Get monthly summary error:', error);
+        console.error("Get monthly summary error:", error);
         return {
             totalIncome: 0,
             totalExpense: 0,
@@ -208,9 +206,9 @@ export const getMonthlySummary = async (
  */
 export const getRecentBudgets = async (
     userId: string,
-    limit: number = 10
+    limit: number = 10,
 ): Promise<Budget[]> => {
-    return getUserBudgets(userId, 'budget_at', 'desc', limit);
+    return getUserBudgets(userId, "budget_at", "desc", limit);
 };
 
 /**
@@ -232,9 +230,9 @@ const syncBudgetToCookie = (newAmount: number): void => {
  */
 const updateUserBudgetAmount = async (
     userId: string,
-    newAmount: number
+    newAmount: number,
 ): Promise<void> => {
-    await updateDocument('users', userId, {
+    await updateDocument("users", userId, {
         amount_budget: newAmount,
         updatedAt: new Date().toISOString(),
     });
@@ -249,17 +247,22 @@ export const addIncome = async (
     userId: string,
     amount: number,
     description: string,
-    budgetAt?: string
-): Promise<{ success: boolean; budgetId?: string; newBalance?: number; error?: string }> => {
+    budgetAt?: string,
+): Promise<{
+    success: boolean;
+    budgetId?: string;
+    newBalance?: number;
+    error?: string;
+}> => {
     try {
-        const user = await getDocument<User>('users', userId);
+        const user = await getDocument<User>("users", userId);
         if (!user) {
-            return { success: false, error: 'User tidak ditemukan' };
+            return { success: false, error: "User tidak ditemukan" };
         }
 
-        const budgetId = await addDocument('budgets', {
+        const budgetId = await addDocument("budgets", {
             userId,
-            type: 'income',
+            type: "income",
             budget_at: budgetAt || new Date().toISOString(),
             amount,
             description,
@@ -271,8 +274,8 @@ export const addIncome = async (
 
         return { success: true, budgetId, newBalance };
     } catch (error) {
-        console.error('Add income error:', error);
-        return { success: false, error: 'Gagal menambah pemasukan' };
+        console.error("Add income error:", error);
+        return { success: false, error: "Gagal menambah pemasukan" };
     }
 };
 
@@ -284,21 +287,26 @@ export const addExpense = async (
     userId: string,
     amount: number,
     description: string,
-    budgetAt?: string
-): Promise<{ success: boolean; budgetId?: string; newBalance?: number; error?: string }> => {
+    budgetAt?: string,
+): Promise<{
+    success: boolean;
+    budgetId?: string;
+    newBalance?: number;
+    error?: string;
+}> => {
     try {
-        const user = await getDocument<User>('users', userId);
+        const user = await getDocument<User>("users", userId);
         if (!user) {
-            return { success: false, error: 'User tidak ditemukan' };
+            return { success: false, error: "User tidak ditemukan" };
         }
 
         if (user.amount_budget < amount) {
-            return { success: false, error: 'Budget tidak cukup' };
+            return { success: false, error: "Budget tidak cukup" };
         }
 
-        const budgetId = await addDocument('budgets', {
+        const budgetId = await addDocument("budgets", {
             userId,
-            type: 'expense',
+            type: "expense",
             budget_at: budgetAt || new Date().toISOString(),
             amount,
             description,
@@ -310,8 +318,8 @@ export const addExpense = async (
 
         return { success: true, budgetId, newBalance };
     } catch (error) {
-        console.error('Add expense error:', error);
-        return { success: false, error: 'Gagal menambah pengeluaran' };
+        console.error("Add expense error:", error);
+        return { success: false, error: "Gagal menambah pengeluaran" };
     }
 };
 
@@ -320,12 +328,27 @@ export const addExpense = async (
  */
 export const addBudget = async (
     userId: string,
-    input: CreateBudgetInput
-): Promise<{ success: boolean; budgetId?: string; newBalance?: number; error?: string }> => {
-    if (input.type === 'income') {
-        return addIncome(userId, input.amount, input.description, input.budget_at);
+    input: CreateBudgetInput,
+): Promise<{
+    success: boolean;
+    budgetId?: string;
+    newBalance?: number;
+    error?: string;
+}> => {
+    if (input.type === "income") {
+        return addIncome(
+            userId,
+            input.amount,
+            input.description,
+            input.budget_at,
+        );
     } else {
-        return addExpense(userId, input.amount, input.description, input.budget_at);
+        return addExpense(
+            userId,
+            input.amount,
+            input.description,
+            input.budget_at,
+        );
     }
 };
 
@@ -334,17 +357,17 @@ export const addBudget = async (
  */
 export const updateBudget = async (
     budgetId: string,
-    updates: UpdateBudgetInput
+    updates: UpdateBudgetInput,
 ): Promise<{ success: boolean; newBalance?: number; error?: string }> => {
     try {
-        const oldBudget = await getDocument<Budget>('budgets', budgetId);
+        const oldBudget = await getDocument<Budget>("budgets", budgetId);
         if (!oldBudget) {
-            return { success: false, error: 'Budget tidak ditemukan' };
+            return { success: false, error: "Budget tidak ditemukan" };
         }
 
-        const user = await getDocument<User>('users', oldBudget.userId);
+        const user = await getDocument<User>("users", oldBudget.userId);
         if (!user) {
-            return { success: false, error: 'User tidak ditemukan' };
+            return { success: false, error: "User tidak ditemukan" };
         }
 
         let newUserBudget = user.amount_budget;
@@ -353,18 +376,21 @@ export const updateBudget = async (
 
         if (updates.amount !== undefined || updates.type !== undefined) {
             // First, reverse the old transaction
-            if (oldBudget.type === 'income') {
+            if (oldBudget.type === "income") {
                 newUserBudget -= oldBudget.amount;
             } else {
                 newUserBudget += oldBudget.amount;
             }
 
             // Then, apply the new transaction
-            if (newType === 'income') {
+            if (newType === "income") {
                 newUserBudget += newAmount;
             } else {
                 if (newUserBudget < newAmount) {
-                    return { success: false, error: 'Budget tidak cukup untuk perubahan ini' };
+                    return {
+                        success: false,
+                        error: "Budget tidak cukup",
+                    };
                 }
                 newUserBudget -= newAmount;
             }
@@ -372,15 +398,15 @@ export const updateBudget = async (
             await updateUserBudgetAmount(oldBudget.userId, newUserBudget);
         }
 
-        await updateDocument('budgets', budgetId, {
+        await updateDocument("budgets", budgetId, {
             ...updates,
             updatedAt: new Date().toISOString(),
         });
 
         return { success: true, newBalance: newUserBudget };
     } catch (error) {
-        console.error('Update budget error:', error);
-        return { success: false, error: 'Gagal update budget' };
+        console.error("Update budget error:", error);
+        return { success: false, error: "Gagal update budget" };
     }
 };
 
@@ -389,31 +415,31 @@ export const updateBudget = async (
  * Automatically reverses the transaction in user's amount_budget
  */
 export const deleteBudget = async (
-    budgetId: string
+    budgetId: string,
 ): Promise<{ success: boolean; newBalance?: number; error?: string }> => {
     try {
-        const budget = await getDocument<Budget>('budgets', budgetId);
+        const budget = await getDocument<Budget>("budgets", budgetId);
         if (!budget) {
-            return { success: false, error: 'Budget tidak ditemukan' };
+            return { success: false, error: "Budget tidak ditemukan" };
         }
 
-        const user = await getDocument<User>('users', budget.userId);
+        const user = await getDocument<User>("users", budget.userId);
         if (!user) {
-            return { success: false, error: 'User tidak ditemukan' };
+            return { success: false, error: "User tidak ditemukan" };
         }
 
         const newUserBudget =
-            budget.type === 'income'
+            budget.type === "income"
                 ? user.amount_budget - budget.amount
                 : user.amount_budget + budget.amount;
 
         await updateUserBudgetAmount(budget.userId, newUserBudget);
 
-        await deleteDocument('budgets', budgetId);
+        await deleteDocument("budgets", budgetId);
 
         return { success: true, newBalance: newUserBudget };
     } catch (error) {
-        console.error('Delete budget error:', error);
-        return { success: false, error: 'Gagal hapus budget' };
+        console.error("Delete budget error:", error);
+        return { success: false, error: "Gagal hapus budget" };
     }
 };

@@ -18,10 +18,10 @@ export function LoginForm() {
 
     const validate = () => {
         if (!username.trim() || !password) {
-            return "Please fill in all fields.";
+            return "Tolong isi semua kolom.";
         }
         if (password.length < 6) {
-            return "Password must be at least 6 characters.";
+            return "Password harus memiliki setidaknya 6 karakter.";
         }
         return null;
     };
@@ -42,11 +42,11 @@ export function LoginForm() {
                 const returnUrl = searchParams.get("returnUrl") || "/recipe";
                 router.push(returnUrl);
             } else {
-                setErrors(result.error || "Login failed. Please try again.");
+                setErrors(result.error || "Login gagal. Silakan coba lagi.");
             }
         } catch (error) {
             console.error("Login error:", error);
-            setErrors("An error occurred. Please try again.");
+            setErrors("Terjadi kesalahan. Silakan coba lagi.");
         } finally {
             setIsSubmitting(false);
         }
@@ -63,7 +63,7 @@ export function LoginForm() {
             <form
                 onSubmit={onSubmit}
                 className="space-y-4"
-                aria-label="Login form"
+                aria-label="Form Masuk"
             >
                 {errors && (
                     <div
@@ -179,7 +179,7 @@ export function LoginForm() {
                 </div>
 
                 <div className="text-center text-sm text-secondary-foreground/80 pt-1">
-                    {"Don't have an account? "}
+                    {"Tidak punya akun? "}
                     <Link
                         href="/auth/register"
                         className="underline font-medium hover:text-background transition-colors"

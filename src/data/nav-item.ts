@@ -3,7 +3,7 @@ import { NavItem } from "@/types/nav";
 export const navItems: NavItem[] = [
     {
         href: "/recipe",
-        label: "Recipe",
+        label: "Resep",
     },
     {
         href: "/budget",

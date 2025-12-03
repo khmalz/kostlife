@@ -128,7 +128,7 @@ export default function BudgetPageClient() {
                 <header className="mb-6 flex items-center gap-3 md:hidden">
                     <MobileSidebar />
                     <SearchBar
-                        placeholder="Search Transaction"
+                        placeholder="Cari Transaksi"
                         value={searchQuery}
                         onChange={setSearchQuery}
                     />
@@ -136,7 +136,7 @@ export default function BudgetPageClient() {
 
                 <div className="hidden md:flex md:items-center md:justify-center md:gap-4 md:mb-8 md:max-w-xl md:mx-auto">
                     <SearchBar
-                        placeholder="Search Transaction..."
+                        placeholder="Cari Transaksi..."
                         value={searchQuery}
                         onChange={setSearchQuery}
                     />
@@ -160,7 +160,7 @@ export default function BudgetPageClient() {
                 <section>
                     <div className="flex items-center justify-between mb-4 md:mb-6">
                         <h2 className="text-xl font-bold text-primary-foreground md:text-2xl">
-                            Transactions
+                            Transaksi
                         </h2>
                         <BudgetFilterCard
                             filterType={filterType}
@@ -175,7 +175,7 @@ export default function BudgetPageClient() {
                         <div className="flex flex-col items-center justify-center py-12 gap-4">
                             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-foreground"></div>
                             <p className="text-primary-foreground/60">
-                                Loading transactions...
+                                Loading transaksi...
                             </p>
                         </div>
                     ) : error ? (
@@ -200,7 +200,7 @@ export default function BudgetPageClient() {
                     ) : (
                         <div className="text-center py-12">
                             <p className="text-primary/60">
-                                No transactions found.
+                                Tidak ada transaksi.
                             </p>
                         </div>
                     )}

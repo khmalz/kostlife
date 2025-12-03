@@ -71,7 +71,7 @@ export function RecipeCard({
                         </span>
                         <span className="flex items-center gap-1">
                             <Clock className="size-3 md:size-2.5" />
-                            {recipe.cookTime} min
+                            {recipe.cookTime} menit
                         </span>
                     </div>
                 </div>
@@ -80,7 +80,7 @@ export function RecipeCard({
                     href={`/recipe/${recipe.id}`}
                     className="flex items-center gap-1 self-end text-sm font-medium text-secondary-foreground md:text-base mt-2 md:mt-3"
                 >
-                    Show detail
+                    Lihat detail
                     <ChevronRight className="size-5 md:size-6" />
                 </Link>
             </div>

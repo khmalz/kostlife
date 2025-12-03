@@ -43,13 +43,13 @@ export function TransactionCard({ transaction }: TransactionCardProps) {
                 <div className="flex items-center gap-2">
                     <CreditCard className="size-5 text-primary-foreground" />
                     <span className="text-lg font-bold text-primary-foreground">
-                        IDR {formattedAmount}
+                        Rp {formattedAmount}
                     </span>
                 </div>
                 <Link
                     href={`/budget/edit/${transaction.id}`}
                     className="p-1.5 rounded-full hover:bg-primary-foreground/10 transition-colors"
-                    title="Edit transaction"
+                    title="Ubah Transaksi"
                 >
                     <Pencil className="size-4 text-primary-foreground" />
                 </Link>

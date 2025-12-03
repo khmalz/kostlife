@@ -65,7 +65,7 @@ export function BudgetFilterCard({
                 <div className="absolute right-0 top-12 z-50 min-w-[180px] bg-background rounded-xl p-4 shadow-lg border border-foreground/10">
                     <div className="mb-3">
                         <p className="text-xs text-foreground/60 mb-1.5">
-                            Filter by
+                            Filter
                         </p>
                         <div className="flex flex-col gap-0.5">
                             <button
@@ -79,7 +79,7 @@ export function BudgetFilterCard({
                                         : "text-foreground hover:bg-foreground/5",
                                 )}
                             >
-                                Income
+                                Pemasukan
                             </button>
                             <button
                                 onClick={() => {
@@ -92,7 +92,7 @@ export function BudgetFilterCard({
                                         : "text-foreground hover:bg-foreground/5",
                                 )}
                             >
-                                Expense
+                                Pengeluaran
                             </button>
                             {filterType !== "all" && (
                                 <button
@@ -111,7 +111,7 @@ export function BudgetFilterCard({
 
                     <div>
                         <p className="text-xs text-foreground/60 mb-1.5">
-                            Sort by
+                            Sort
                         </p>
                         <div className="flex flex-col gap-0.5">
                             <button

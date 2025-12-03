@@ -10,14 +10,17 @@ interface SearchBarProps {
 }
 
 export function SearchBar({
-    placeholder = "Search...",
+    placeholder = "Cari...",
     value,
     onChange,
 }: SearchBarProps) {
+    const ariaLabel = typeof placeholder === "string" ? placeholder : "Cari";
+
     return (
         <div className="relative flex-1">
             <Input
                 type="text"
+                aria-label={ariaLabel}
                 placeholder={placeholder}
                 value={value}
                 onChange={(e) => onChange?.(e.target.value)}

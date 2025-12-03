@@ -83,13 +83,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
                 return {
                     success: false,
-                    error: result.error || "Login failed",
+                    error: result.error || "Login gagal",
                 };
             } catch (error) {
                 console.error("Login error:", error);
                 return {
                     success: false,
-                    error: "An error occurred during login",
+                    error: "Terjadi kesalahan saat login. Silakan coba lagi.",
                 };
             } finally {
                 setIsLoading(false);
@@ -124,13 +124,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
                 return {
                     success: false,
-                    error: result.error || "Registration failed",
+                    error: result.error || "Registration gagal",
                 };
             } catch (error) {
                 console.error("Register error:", error);
                 return {
                     success: false,
-                    error: "An error occurred during registration",
+                    error: "Terjadi kesalahan saat register. Silakan coba lagi.",
                 };
             } finally {
                 setIsLoading(false);
@@ -154,7 +154,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
                 setUser(null);
             }
         } catch (error) {
-            console.error("Refresh session error:", error);
+            console.error("Refresh sesi error:", error);
         }
     }, []);
 
@@ -198,7 +198,7 @@ export function useAuth(): AuthContextType {
     const context = useContext(AuthContext);
 
     if (context === undefined) {
-        throw new Error("useAuth must be used within an AuthProvider");
+        throw new Error("useAuth harus digunakan di dalam AuthProvider");
     }
 
     return context;

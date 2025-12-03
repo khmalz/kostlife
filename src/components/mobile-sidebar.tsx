@@ -1,5 +1,6 @@
 "use client";
 
+import { LogoutDialog } from "@/components/logout-dialog";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -9,7 +10,6 @@ import {
     SheetTitle,
     SheetTrigger,
 } from "@/components/ui/sheet";
-import { LogoutDialog } from "@/components/logout-dialog";
 import { navItems } from "@/data/nav-item";
 import { useAuth } from "@/hooks/useAuth";
 import { LogIn, LogOut, Menu, User, X } from "lucide-react";

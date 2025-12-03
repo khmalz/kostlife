@@ -10,4 +10,9 @@
  * const { user, isAuthenticated, login, logout, register, updateBudget } = useAuth();
  */
 
-export { useAuth, type AuthContextType, type SafeUser, type UserSession } from '@/contexts/AuthContext';
+export {
+    useAuth,
+    type AuthContextType,
+    type SafeUser,
+    type UserSession,
+} from "@/contexts/AuthContext";

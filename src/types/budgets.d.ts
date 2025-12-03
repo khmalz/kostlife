@@ -1,7 +1,7 @@
 export interface Budget {
     id: string;
     userId: string;
-    type: 'income' | 'expense';
+    type: "income" | "expense";
     budget_at: string; // ISO date string
     amount: number;
     description: string;

@@ -1,5 +1,5 @@
-import { getDownloadURL, ref } from 'firebase/storage';
-import { storage } from '../firebase';
+import { getDownloadURL, ref } from "firebase/storage";
+import { storage } from "../firebase";
 
 /**
  * Get download URL for an image from Firebase Storage
@@ -7,14 +7,14 @@ import { storage } from '../firebase';
  * @returns Download URL string
  */
 export const getImageURL = async (path: string): Promise<string> => {
-  try {
-    const storageRef = ref(storage, path);
-    const url = await getDownloadURL(storageRef);
-    return url;
-  } catch (error) {
-    console.error('Error getting image URL:', error);
-    throw error;
-  }
+    try {
+        const storageRef = ref(storage, path);
+        const url = await getDownloadURL(storageRef);
+        return url;
+    } catch (error) {
+        console.error("Error getting image URL:", error);
+        throw error;
+    }
 };
 
 /**
@@ -22,12 +22,14 @@ export const getImageURL = async (path: string): Promise<string> => {
  * @param paths - Array of paths to images in storage
  * @returns Array of download URL strings
  */
-export const getMultipleImageURLs = async (paths: string[]): Promise<string[]> => {
-  try {
-    const urls = await Promise.all(paths.map((path) => getImageURL(path)));
-    return urls;
-  } catch (error) {
-    console.error('Error getting multiple image URLs:', error);
-    throw error;
-  }
+export const getMultipleImageURLs = async (
+    paths: string[],
+): Promise<string[]> => {
+    try {
+        const urls = await Promise.all(paths.map((path) => getImageURL(path)));
+        return urls;
+    } catch (error) {
+        console.error("Error getting multiple image URLs:", error);
+        throw error;
+    }
 };

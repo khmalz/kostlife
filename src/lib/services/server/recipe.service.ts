@@ -2,14 +2,14 @@ import {
     getDocument,
     getDocuments,
     queryDocuments,
-} from '@/lib/firebase/firestore';
-import { getImageURL } from '@/lib/firebase/storage';
-import { convertFirestoreTimestamps } from '@/lib/utils';
-import type { Recipe } from '@/types/recipes';
+} from "@/lib/firebase/firestore";
+import { getImageURL } from "@/lib/firebase/storage";
+import { convertFirestoreTimestamps } from "@/lib/utils";
+import type { Recipe } from "@/types/recipes";
 
 export interface RecipeWithImageURL extends Recipe {
-  imageURL: string;
-  isFavorite: boolean;
+    imageURL: string;
+    isFavorite: boolean;
 }
 
 /**
@@ -18,7 +18,7 @@ export interface RecipeWithImageURL extends Recipe {
  * @returns true if it's an external URL
  */
 const isExternalURL = (imagePath: string): boolean => {
-  return imagePath.startsWith('http://') || imagePath.startsWith('https://');
+    return imagePath.startsWith("http://") || imagePath.startsWith("https://");
 };
 
 /**
@@ -27,16 +27,16 @@ const isExternalURL = (imagePath: string): boolean => {
  * @returns Full download URL or the original URL
  */
 const resolveImageURL = async (imagePath: string): Promise<string> => {
-  try {
-    // If imagePath is already an external URL (picsum, etc.), return it as-is
-    if (isExternalURL(imagePath)) {
-      return imagePath;
+    try {
+        // If imagePath is already an external URL (picsum, etc.), return it as-is
+        if (isExternalURL(imagePath)) {
+            return imagePath;
+        }
+        // Otherwise, get from Firebase Storage
+        return await getImageURL(imagePath);
+    } catch {
+        return "";
     }
-    // Otherwise, get from Firebase Storage
-    return await getImageURL(imagePath);
-  } catch {
-    return '';
-  }
 };
 
 /**
@@ -44,18 +44,18 @@ const resolveImageURL = async (imagePath: string): Promise<string> => {
  * @param recipe - Recipe from Firebase
  * @returns Recipe with resolved image URL and default isFavorite
  */
- const transformRecipe = async (recipe: Recipe): Promise<RecipeWithImageURL> => {
-   const imageURL = await resolveImageURL(recipe.image);
+const transformRecipe = async (recipe: Recipe): Promise<RecipeWithImageURL> => {
+    const imageURL = await resolveImageURL(recipe.image);
 
-   // Convert Firestore Timestamps to ISO strings
-   const converted = convertFirestoreTimestamps({
-     ...recipe,
-     imageURL,
-     isFavorite: false,
-   });
+    // Convert Firestore Timestamps to ISO strings
+    const converted = convertFirestoreTimestamps({
+        ...recipe,
+        imageURL,
+        isFavorite: false,
+    });
 
-   return converted as RecipeWithImageURL;
- };
+    return converted as RecipeWithImageURL;
+};
 
 // ==================== RECIPE FUNCTIONS ====================
 
@@ -65,20 +65,20 @@ const resolveImageURL = async (imagePath: string): Promise<string> => {
  * @returns Recipe with resolved image URL
  */
 export const getRecipe = async (
-  recipeId: string
+    recipeId: string,
 ): Promise<RecipeWithImageURL | null> => {
-  try {
-    const recipe = await getDocument<Recipe>('recipes', recipeId);
+    try {
+        const recipe = await getDocument<Recipe>("recipes", recipeId);
 
-    if (!recipe) {
-      return null;
+        if (!recipe) {
+            return null;
+        }
+
+        return await transformRecipe(recipe);
+    } catch (error) {
+        console.error("Error getting recipe:", error);
+        return null;
     }
-
-    return await transformRecipe(recipe);
-  } catch (error) {
-    console.error('Error getting recipe:', error);
-    return null;
-  }
 };
 
 /**
@@ -86,20 +86,20 @@ export const getRecipe = async (
  * @returns Array of recipes with resolved image URLs
  */
 export const getAllRecipes = async (): Promise<RecipeWithImageURL[]> => {
-   try {
-     const recipes = await getDocuments<Recipe>('recipes');
+    try {
+        const recipes = await getDocuments<Recipe>("recipes");
 
-     // Resolve all image URLs in parallel
-     const recipesWithURLs = await Promise.all(
-       recipes.map(transformRecipe)
-     );
+        // Resolve all image URLs in parallel
+        const recipesWithURLs = await Promise.all(recipes.map(transformRecipe));
 
-     return recipesWithURLs.map((recipe) => convertFirestoreTimestamps(recipe)) as RecipeWithImageURL[];
-   } catch (error) {
-     console.error('Error getting all recipes:', error);
-     return [];
-   }
- };;
+        return recipesWithURLs.map((recipe) =>
+            convertFirestoreTimestamps(recipe),
+        ) as RecipeWithImageURL[];
+    } catch (error) {
+        console.error("Error getting all recipes:", error);
+        return [];
+    }
+};
 
 /**
  * Get recipes by price range
@@ -107,25 +107,25 @@ export const getAllRecipes = async (): Promise<RecipeWithImageURL[]> => {
  * @returns Array of recipes within price range
  */
 export const getRecipesByMaxPrice = async (
-  maxPrice: number
+    maxPrice: number,
 ): Promise<RecipeWithImageURL[]> => {
-  try {
-    const recipes = await queryDocuments<Recipe>(
-      'recipes',
-      [{ field: 'price', operator: '<=', value: maxPrice }],
-      'price',
-      'asc'
-    );
+    try {
+        const recipes = await queryDocuments<Recipe>(
+            "recipes",
+            [{ field: "price", operator: "<=", value: maxPrice }],
+            "price",
+            "asc",
+        );
 
-    const recipesWithURLs = await Promise. all(
-      recipes.map(transformRecipe)
-    );
+        const recipesWithURLs = await Promise.all(recipes.map(transformRecipe));
 
-    return recipesWithURLs.map((recipe) => convertFirestoreTimestamps(recipe)) as RecipeWithImageURL[];
-  } catch (error) {
-    console.error('Error getting recipes by price:', error);
-    return [];
-  }
+        return recipesWithURLs.map((recipe) =>
+            convertFirestoreTimestamps(recipe),
+        ) as RecipeWithImageURL[];
+    } catch (error) {
+        console.error("Error getting recipes by price:", error);
+        return [];
+    }
 };
 
 /**
@@ -134,25 +134,25 @@ export const getRecipesByMaxPrice = async (
  * @returns Array of recipes within calorie limit
  */
 export const getRecipesByMaxCalories = async (
-  maxCalories: number
+    maxCalories: number,
 ): Promise<RecipeWithImageURL[]> => {
-  try {
-    const recipes = await queryDocuments<Recipe>(
-      'recipes',
-      [{ field: 'calories', operator: '<=', value: maxCalories }],
-      'calories',
-      'asc'
-    );
+    try {
+        const recipes = await queryDocuments<Recipe>(
+            "recipes",
+            [{ field: "calories", operator: "<=", value: maxCalories }],
+            "calories",
+            "asc",
+        );
 
-    const recipesWithURLs = await Promise.all(
-      recipes. map(transformRecipe)
-    );
+        const recipesWithURLs = await Promise.all(recipes.map(transformRecipe));
 
-    return recipesWithURLs.map((recipe) => convertFirestoreTimestamps(recipe)) as RecipeWithImageURL[];
-  } catch (error) {
-    console.error('Error getting recipes by calories:', error);
-    return [];
-  }
+        return recipesWithURLs.map((recipe) =>
+            convertFirestoreTimestamps(recipe),
+        ) as RecipeWithImageURL[];
+    } catch (error) {
+        console.error("Error getting recipes by calories:", error);
+        return [];
+    }
 };
 
 /**
@@ -161,25 +161,25 @@ export const getRecipesByMaxCalories = async (
  * @returns Array of recipes within cook time limit
  */
 export const getRecipesByMaxCookTime = async (
-  maxCookTime: number
+    maxCookTime: number,
 ): Promise<RecipeWithImageURL[]> => {
-  try {
-    const recipes = await queryDocuments<Recipe>(
-      'recipes',
-      [{ field: 'cookTime', operator: '<=', value: maxCookTime }],
-      'cookTime',
-      'asc'
-    );
+    try {
+        const recipes = await queryDocuments<Recipe>(
+            "recipes",
+            [{ field: "cookTime", operator: "<=", value: maxCookTime }],
+            "cookTime",
+            "asc",
+        );
 
-    const recipesWithURLs = await Promise. all(
-      recipes.map(transformRecipe)
-    );
+        const recipesWithURLs = await Promise.all(recipes.map(transformRecipe));
 
-    return recipesWithURLs.map((recipe) => convertFirestoreTimestamps(recipe)) as RecipeWithImageURL[];
-  } catch (error) {
-    console.error('Error getting recipes by cook time:', error);
-    return [];
-  }
+        return recipesWithURLs.map((recipe) =>
+            convertFirestoreTimestamps(recipe),
+        ) as RecipeWithImageURL[];
+    } catch (error) {
+        console.error("Error getting recipes by cook time:", error);
+        return [];
+    }
 };
 
 /**
@@ -189,17 +189,17 @@ export const getRecipesByMaxCookTime = async (
  * @returns Array of matching recipes
  */
 export const searchRecipesByTitle = async (
-  searchTerm: string
+    searchTerm: string,
 ): Promise<RecipeWithImageURL[]> => {
-  try {
-    const allRecipes = await getAllRecipes();
-    const lowerSearchTerm = searchTerm.toLowerCase();
+    try {
+        const allRecipes = await getAllRecipes();
+        const lowerSearchTerm = searchTerm.toLowerCase();
 
-    return allRecipes.filter((recipe) =>
-      recipe.title.toLowerCase(). includes(lowerSearchTerm)
-    );
-  } catch (error) {
-    console.error('Error searching recipes:', error);
-    return [];
-  }
+        return allRecipes.filter((recipe) =>
+            recipe.title.toLowerCase().includes(lowerSearchTerm),
+        );
+    } catch (error) {
+        console.error("Error searching recipes:", error);
+        return [];
+    }
 };
