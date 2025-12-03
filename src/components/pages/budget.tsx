@@ -15,6 +15,7 @@ import { deleteBudget, getUserBudgets } from "@/lib/services/budget.service";
 import type { Budget } from "@/types/budgets";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import Footer from "../footer";
 
 function budgetToTransaction(budget: Budget): Transaction {
     return {
@@ -83,7 +84,7 @@ export default function BudgetPageClient() {
 
     const handleLogout = () => {
         logout();
-        router.push("/auth/login");
+        router.push("/recipe");
     };
 
     const handleAddTransaction = () => {
@@ -95,8 +96,8 @@ export default function BudgetPageClient() {
         try {
             const result = await deleteBudget(id);
             if (result.success) {
-                // Remove from local state
                 setBudgets((prev) => prev.filter((b) => b.id !== id));
+
                 // Update balance in auth context to refresh WalletCard
                 if (result.newBalance !== undefined) {
                     updateBudget(result.newBalance);
@@ -144,7 +145,7 @@ export default function BudgetPageClient() {
     const isLoading = authLoading || isLoadingBudgets;
 
     return (
-        <div className="min-h-screen bg-secondary">
+        <div className="min-h-screen bg-secondary flex flex-col">
             {/* Desktop Navbar */}
             <Navbar
                 isLoggedIn={isAuthenticated}
@@ -153,7 +154,7 @@ export default function BudgetPageClient() {
                 onLogout={handleLogout}
             />
 
-            <div className="mx-auto max-w-md px-4 py-6 md:max-w-6xl md:px-8 md:py-10">
+            <div className="flex-1 w-full max-w-md mx-auto px-4 py-6 md:max-w-6xl md:px-8 md:py-10">
                 {/* Mobile Header */}
                 <header className="mb-6 flex items-center gap-3 md:hidden">
                     <MobileSidebar />
@@ -238,6 +239,8 @@ export default function BudgetPageClient() {
                     )}
                 </section>
             </div>
+
+            <Footer />
         </div>
     );
 }

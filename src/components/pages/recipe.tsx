@@ -12,6 +12,7 @@ import type { RecipeWithImageURL } from "@/lib/services/server/recipe.service";
 import { Heart } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import Footer from "../footer";
 
 interface RecipePageProps {
     initialRecipes: RecipeWithImageURL[];
@@ -69,7 +70,7 @@ export default function RecipePage({
     };
 
     const handleLogin = () => {
-        router.push("/auth/login");
+        router.push("/recipe");
     };
 
     const handleLogout = () => {
@@ -100,7 +101,7 @@ export default function RecipePage({
     }, [initialRecipes, debouncedSearch, showFavoritesOnly, favoriteIds]);
 
     return (
-        <div className="min-h-screen bg-secondary">
+        <div className="min-h-screen bg-secondary flex flex-col">
             {/* Desktop Navbar */}
             <Navbar
                 isLoggedIn={isAuthenticated}
@@ -110,7 +111,7 @@ export default function RecipePage({
                 onLogout={handleLogout}
             />
 
-            <div className="mx-auto max-w-md px-4 py-6 md:max-w-6xl md:px-8 md:py-10">
+            <div className="flex-1 mx-auto max-w-md px-4 py-6 md:max-w-6xl md:px-8 md:py-10">
                 {/* Mobile Header */}
                 <header className="mb-6 flex items-center gap-3 md:hidden">
                     <MobileSidebar />
@@ -218,6 +219,8 @@ export default function RecipePage({
                     )}
                 </section>
             </div>
+
+            <Footer />
         </div>
     );
 }
