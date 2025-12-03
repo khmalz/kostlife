@@ -8,6 +8,7 @@ const AUTH_COOKIE_NAME = 'kostlife_auth';
 const PROTECTED_ROUTES = [
   '/wallet',
   '/profile',
+  '/budget',
 ];
 
 // Routes that should redirect to home if already authenticated

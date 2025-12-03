@@ -58,7 +58,7 @@
     --card: #ffffff;
     --card-foreground: #1f4529;
 
-    --popover: #ffffff;
+    --popover: #f5d7bf; /* warm beige for dropdowns */
     --popover-foreground: #1f4529;
 
     --primary: #1f4529; /* deep green */
@@ -153,5 +153,16 @@
     button:not(:disabled),
     [role="button"]:not(:disabled) {
         cursor: pointer;
+    }
+    /* Chrome, Safari, Edge, Opera */
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    /* Firefox */
+    input[type="number"] {
+        -moz-appearance: textfield;
     }
 }
