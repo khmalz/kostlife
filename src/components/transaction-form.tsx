@@ -72,7 +72,20 @@ export function TransactionForm({
 
     return (
         <div className="w-full">
-            <div className="flex items-center gap-4 mb-8">
+            {/* Mobile Header */}
+            <header className="flex items-center justify-center relative px-4 py-4 md:hidden">
+                <button
+                    onClick={handleBack}
+                    className="absolute left-4 flex items-center justify-center size-10 text-primary-foreground hover:bg-secondary/40 rounded-lg transition-colors"
+                >
+                    <ArrowLeft className="size-6" />
+                </button>
+                <h1 className="text-xl font-semibold text-primary-foreground">
+                    {mode === "add" ? "Add Transaction" : "Edit Transaction"}
+                </h1>
+            </header>
+
+            <div className="hidden md:flex items-center gap-4 mb-8">
                 <button
                     onClick={handleBack}
                     className="flex items-center gap-2 text-primary-foreground hover:text-primary-foreground/80 transition-colors"
@@ -120,26 +133,24 @@ export function TransactionForm({
                             placeholder="Transaction Nominee"
                             value={amount}
                             onChange={setAmount}
-                            className="h-11 rounded-full bg-background border-0 text-foreground px-4 placeholder:text-foreground/60"
+                            className="h-11 rounded-full bg-background border-0 text-foreground px-4 py-0 shadow-none placeholder:text-foreground/60"
                         />
 
                         <DatePicker
                             date={date}
                             onDateChange={setDate}
                             placeholder="Transaction Date"
-                            className="h-11 rounded-full bg-background border-0 text-foreground px-4 hover:bg-background/80"
+                            className="h-11 rounded-full bg-background border-0 text-foreground px-4"
                         />
 
-                        {/* Transaction Description */}
                         <Input
                             type="text"
                             placeholder="Transaction Description"
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
-                            className="h-11 rounded-full bg-background border-0 text-foreground px-4 placeholder:text-foreground/60"
+                            className="h-11 rounded-full bg-background border-0 text-foreground px-4 py-0 shadow-none placeholder:text-foreground/60"
                         />
 
-                        {/* Submit Button */}
                         <Button
                             type="submit"
                             disabled={!isFormValid || isLoading}
