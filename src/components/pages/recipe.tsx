@@ -23,13 +23,20 @@ export default function RecipePage({
     error: initialError,
 }: RecipePageProps) {
     const router = useRouter();
-    const { user, isAuthenticated, isLoading, logout } = useAuth();
+    const { user, isAuthenticated, isLoading, logout, refreshSession } =
+        useAuth();
 
     const [searchQuery, setSearchQuery] = useState("");
     const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
     const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
 
     const debouncedSearch = useDebounce(searchQuery, 300);
+
+    useEffect(() => {
+        if (isAuthenticated) {
+            refreshSession();
+        }
+    }, [isAuthenticated, refreshSession]);
 
     useEffect(() => {
         const fetchFavorites = async () => {
@@ -203,7 +210,7 @@ export default function RecipePage({
                     )}
 
                     {!initialError && filteredRecipes.length === 0 && (
-                        <p className="text-center text-primary-foreground/60">
+                        <p className="text-center text-primary-foreground/90">
                             {showFavoritesOnly
                                 ? "Tidak ada resep favorit."
                                 : "Resep tidak ditemukan."}

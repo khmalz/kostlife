@@ -11,7 +11,7 @@ import { SearchBar } from "@/components/search-bar";
 import { Transaction, TransactionCard } from "@/components/transaction-card";
 import { WalletCard } from "@/components/wallet-card";
 import { useAuth } from "@/hooks/useAuth";
-import { getUserBudgets } from "@/lib/services/budget.service";
+import { deleteBudget, getUserBudgets } from "@/lib/services/budget.service";
 import type { Budget } from "@/types/budgets";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -28,7 +28,13 @@ function budgetToTransaction(budget: Budget): Transaction {
 
 export default function BudgetPageClient() {
     const router = useRouter();
-    const { user, isAuthenticated, isLoading: authLoading, logout } = useAuth();
+    const {
+        user,
+        isAuthenticated,
+        isLoading: authLoading,
+        logout,
+        updateBudget,
+    } = useAuth();
 
     const [budgets, setBudgets] = useState<Budget[]>([]);
     const [isLoadingBudgets, setIsLoadingBudgets] = useState(true);
@@ -37,6 +43,7 @@ export default function BudgetPageClient() {
     const [searchQuery, setSearchQuery] = useState("");
     const [filterType, setFilterType] = useState<FilterType>("all");
     const [sortOrder, setSortOrder] = useState<SortOrder>("descending");
+    const [deletingId, setDeletingId] = useState<string | null>(null);
 
     const fetchBudgets = useCallback(async () => {
         if (!user?.id) return;
@@ -81,6 +88,29 @@ export default function BudgetPageClient() {
 
     const handleAddTransaction = () => {
         router.push("/budget/add");
+    };
+
+    const handleDeleteTransaction = async (id: string) => {
+        setDeletingId(id);
+        try {
+            const result = await deleteBudget(id);
+            if (result.success) {
+                // Remove from local state
+                setBudgets((prev) => prev.filter((b) => b.id !== id));
+                // Update balance in auth context to refresh WalletCard
+                if (result.newBalance !== undefined) {
+                    updateBudget(result.newBalance);
+                }
+            } else {
+                console.error("Delete failed:", result.error);
+                alert(result.error || "Gagal menghapus transaksi");
+            }
+        } catch (err) {
+            console.error("Error deleting transaction:", err);
+            alert("Gagal menghapus transaksi. Silakan coba lagi.");
+        } finally {
+            setDeletingId(null);
+        }
     };
 
     const filteredTransactions = useMemo(() => {
@@ -194,12 +224,14 @@ export default function BudgetPageClient() {
                                 <TransactionCard
                                     key={transaction.id}
                                     transaction={transaction}
+                                    onDelete={handleDeleteTransaction}
+                                    isDeleting={deletingId === transaction.id}
                                 />
                             ))}
                         </div>
                     ) : (
                         <div className="text-center py-12">
-                            <p className="text-primary/60">
+                            <p className="text-primary-foreground/90">
                                 Tidak ada transaksi.
                             </p>
                         </div>
