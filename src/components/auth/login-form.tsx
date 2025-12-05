@@ -39,8 +39,14 @@ export function LoginForm() {
             const result = await login(username, password);
 
             if (result.success) {
+                // Clear form inputs
+                setUsername("");
+                setPassword("");
+                setErrors(null);
+
                 const returnUrl = searchParams.get("returnUrl") || "/recipe";
                 router.push(returnUrl);
+                router.refresh();
             } else {
                 setErrors(result.error || "Login gagal. Silakan coba lagi.");
             }

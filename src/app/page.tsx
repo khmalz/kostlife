@@ -1,13 +1,6 @@
-import Image from "next/image";
-import {
-    Utensils,
-    Wallet,
-    Heart,
-    TrendingUp,
-    Clock,
-    Users,
-} from "lucide-react";
 import Footer from "@/components/footer";
+import { Heart, TrendingUp, Utensils, Wallet } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 
 const features = [
@@ -77,7 +70,8 @@ export default function Home() {
                             >
                                 <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-secondary mb-4">
                                     <feature.icon className="w-7 h-7 text-secondary-foreground" />
-                                </div>                                <h3 className="text-lg md:text-xl font-semibold text-primary-foreground mb-2">
+                                </div>
+                                <h3 className="text-lg md:text-xl font-semibold text-primary-foreground mb-2">
                                     {feature.title}
                                 </h3>
                                 <p className="text-primary-foreground/70 text-sm md:text-base">

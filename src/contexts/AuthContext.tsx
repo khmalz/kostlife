@@ -1,22 +1,27 @@
 "use client";
 
 import {
-    createContext,
-    useContext,
-    useState,
-    useEffect,
-    useCallback,
-    type ReactNode,
-} from "react";
+    removeAuthCookie,
+    setAuthCookie,
+    type UserSession,
+} from "@/lib/cookies";
 import {
     getCurrentUser,
     loginUser,
     logoutUser as logoutService,
-    registerUser,
     refreshUserSession,
+    registerUser,
     type SafeUser,
 } from "@/lib/services/auth.service";
-import { setAuthCookie, type UserSession } from "@/lib/cookies";
+import { useRouter } from "next/navigation";
+import {
+    createContext,
+    useCallback,
+    useContext,
+    useEffect,
+    useState,
+    type ReactNode,
+} from "react";
 
 interface AuthContextType {
     user: UserSession | null;
@@ -43,6 +48,7 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
+    const router = useRouter();
     const [user, setUser] = useState<UserSession | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -53,6 +59,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
                 setUser(currentUser);
             } catch (error) {
                 console.error("Error initializing auth:", error);
+
+                // Clear any corrupted cookie
+                removeAuthCookie();
                 setUser(null);
             } finally {
                 setIsLoading(false);
@@ -140,9 +149,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
     );
 
     const logout = useCallback(() => {
-        logoutService();
+        // Clear user state
         setUser(null);
-    }, []);
+
+        // Remove cookie
+        logoutService();
+
+        // Force router refresh to sync state across components
+        router.refresh();
+    }, [router]);
 
     const refreshSession = useCallback(async () => {
         try {
@@ -205,4 +220,4 @@ export function useAuth(): AuthContextType {
 }
 
 // Export types
-export type { AuthContextType, UserSession, SafeUser };
+export type { AuthContextType, SafeUser, UserSession };

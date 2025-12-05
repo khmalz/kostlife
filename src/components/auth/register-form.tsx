@@ -45,7 +45,14 @@ export function RegisterForm() {
             const result = await register(username.trim(), password, 0);
 
             if (result.success) {
+                // Clear form inputs
+                setUsername("");
+                setPassword("");
+                setConfirm("");
+                setErrors(null);
+
                 router.push("/recipe");
+                router.refresh();
             } else {
                 setErrors(result.error || "Register gagal. Silakan coba lagi.");
             }

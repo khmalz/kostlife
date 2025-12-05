@@ -12,6 +12,12 @@ const DEFAULT_OPTIONS: CookieOptions = {
     sameSite: "lax",
 };
 
+const DELETE_OPTIONS: CookieOptions = {
+    path: "/",
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+};
+
 export const setCookie = (
     name: string,
     value: string,
@@ -60,10 +66,29 @@ export const getCookie = (name: string): string | null => {
     return null;
 };
 
-export const deleteCookie = (name: string, path: string = "/"): void => {
+export const deleteCookie = (
+    name: string,
+    options: CookieOptions = {},
+): void => {
     if (typeof document === "undefined") return;
 
-    document.cookie = `${encodeURIComponent(name)}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=${path}`;
+    const opts = { ...DELETE_OPTIONS, ...options };
+
+    let cookieString = `${encodeURIComponent(name)}=; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+
+    if (opts.path) {
+        cookieString += `; path=${opts.path}`;
+    }
+
+    if (opts.secure) {
+        cookieString += "; secure";
+    }
+
+    if (opts.sameSite) {
+        cookieString += `; samesite=${opts.sameSite}`;
+    }
+
+    document.cookie = cookieString;
 };
 
 export const hasCookie = (name: string): boolean => {
@@ -100,7 +125,12 @@ export const getAuthCookie = (): UserSession | null => {
 };
 
 export const removeAuthCookie = (): void => {
-    deleteCookie(AUTH_COOKIE_NAME);
+    // Delete with same options as when cookie was set to ensure proper removal
+    deleteCookie(AUTH_COOKIE_NAME, {
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+    });
 };
 
 export const isAuthenticated = (): boolean => {
