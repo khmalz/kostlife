@@ -4,7 +4,7 @@
     // For a full list of overridable settings, and general information on folder-specific settings,//zed.dev/docs/configuring-zed#settings-files
     "project_name": "kostlife",
     "prettier": {
-        "allowed": true
+        "allowed": true,
     },
     "languages": {
         "JavaScript": {
@@ -12,9 +12,9 @@
             "use_autoclose": true,
             "code_actions_on_format": {
                 "source.fixAll.eslint": true,
-                "source.organizeImports": true
+                "source.organizeImports": true,
             },
-            "formatter": "prettier"
+            "formatter": "prettier",
         },
         "TypeScript": {
             "colorize_brackets": true,
@@ -22,9 +22,9 @@
             "use_autoclose": true,
             "code_actions_on_format": {
                 "source.fixAll.eslint": true,
-                "source.organizeImports": true
+                "source.organizeImports": true,
             },
-            "formatter": "prettier"
-        }
-    }
+            "formatter": "prettier",
+        },
+    },
 }

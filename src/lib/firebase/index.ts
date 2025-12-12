@@ -1,5 +1,5 @@
 // Firebase App and Firestore
-export { default as app, db, storage } from "../firebase";
+export { default as app, db } from "../firebase";
 
 // Firestore helpers
 export {
@@ -11,6 +11,3 @@ export {
     setDocument,
     updateDocument,
 } from "./firestore";
-
-// Storage helpers
-export { getImageURL, getMultipleImageURLs } from "./storage";

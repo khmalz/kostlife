@@ -1,17 +1,24 @@
 "use client";
 
-import { useState } from "react";
-import { Flame, Clock, ChevronRight } from "lucide-react";
+import { FavoriteButton } from "@/components/favorite-button";
+import type { RecipeWithImageURL } from "@/lib/services/server/recipe.service";
+import { ChevronRight, Clock, Flame } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import type { Recipe } from "@/types/recipes";
-import { FavoriteButton } from "@/components/favorite-button";
+import { useState } from "react";
 
 interface RecipeCardProps {
-    recipe: Recipe;
+    recipe: RecipeWithImageURL;
     isFavorite?: boolean;
     onFavoriteChange?: (isFavorited: boolean) => void;
 }
+
+/**
+ * Get the image source URL - handles both external URLs (http/https) and local assets
+ */
+const getImageSrc = (recipe: RecipeWithImageURL): string => {
+    return recipe.imageURL || recipe.image;
+};
 
 export function RecipeCard({
     recipe,
@@ -32,7 +39,7 @@ export function RecipeCard({
                     <div className="absolute inset-0 bg-secondary/30 animate-pulse" />
                 )}
                 <Image
-                    src={recipe.image}
+                    src={getImageSrc(recipe)}
                     alt={recipe.title}
                     fill
                     className={`object-cover transition-opacity duration-300 ${

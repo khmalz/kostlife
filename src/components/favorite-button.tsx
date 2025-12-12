@@ -1,10 +1,10 @@
 "use client";
 
-import { Heart } from "lucide-react";
-import { useState, useTransition, useEffect } from "react";
-import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { toggleFavorite } from "@/lib/services/favorite.service";
+import { cn } from "@/lib/utils";
+import { Heart } from "lucide-react";
+import { useEffect, useState, useTransition } from "react";
 
 interface FavoriteButtonProps {
     recipeId: string;

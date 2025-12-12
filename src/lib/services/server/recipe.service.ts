@@ -1,9 +1,4 @@
-import {
-    getDocument,
-    getDocuments,
-    queryDocuments,
-} from "@/lib/firebase/firestore";
-import { getImageURL } from "@/lib/firebase/storage";
+import { getDocuments, queryDocuments } from "@/lib/firebase/firestore";
 import { convertFirestoreTimestamps } from "@/lib/utils";
 import type { Recipe } from "@/types/recipes";
 
@@ -22,21 +17,17 @@ const isExternalURL = (imagePath: string): boolean => {
 };
 
 /**
- * Resolve image URL - use directly if external URL, otherwise fetch from Firebase Storage
- * @param imagePath - Path in Firebase Storage or external URL
- * @returns Full download URL or the original URL
+ * Resolve image URL - use directly if external URL, otherwise use as local asset path
+ * @param imagePath - Path to local asset or external URL
+ * @returns The URL to use for displaying the image
  */
-const resolveImageURL = async (imagePath: string): Promise<string> => {
-    try {
-        // If imagePath is already an external URL (picsum, etc.), return it as-is
-        if (isExternalURL(imagePath)) {
-            return imagePath;
-        }
-        // Otherwise, get from Firebase Storage
-        return await getImageURL(imagePath);
-    } catch {
-        return "";
+const resolveImageURL = (imagePath: string): string => {
+    // If imagePath is already an external URL (http/https), return it as-is
+    if (isExternalURL(imagePath)) {
+        return imagePath;
     }
+    // Otherwise, return as local asset path (e.g., /assets/recipes/xxx.jpg)
+    return imagePath;
 };
 
 /**
@@ -44,8 +35,8 @@ const resolveImageURL = async (imagePath: string): Promise<string> => {
  * @param recipe - Recipe from Firebase
  * @returns Recipe with resolved image URL and default isFavorite
  */
-const transformRecipe = async (recipe: Recipe): Promise<RecipeWithImageURL> => {
-    const imageURL = await resolveImageURL(recipe.image);
+const transformRecipe = (recipe: Recipe): RecipeWithImageURL => {
+    const imageURL = resolveImageURL(recipe.image);
 
     // Convert Firestore Timestamps to ISO strings
     const converted = convertFirestoreTimestamps({
@@ -60,21 +51,28 @@ const transformRecipe = async (recipe: Recipe): Promise<RecipeWithImageURL> => {
 // ==================== RECIPE FUNCTIONS ====================
 
 /**
- * Get a single recipe by ID
- * @param recipeId - The recipe document ID
+ * Get a single recipe by ID (slug field, not document ID)
+ * @param recipeId - The recipe ID (slug)
  * @returns Recipe with resolved image URL
  */
 export const getRecipe = async (
     recipeId: string,
 ): Promise<RecipeWithImageURL | null> => {
     try {
-        const recipe = await getDocument<Recipe>("recipes", recipeId);
+        // Query by 'id' field (slug) instead of document ID
+        const recipes = await queryDocuments<Recipe>(
+            "recipes",
+            [{ field: "id", operator: "==", value: recipeId }],
+            undefined,
+            "asc",
+            1,
+        );
 
-        if (!recipe) {
+        if (recipes.length === 0) {
             return null;
         }
 
-        return await transformRecipe(recipe);
+        return transformRecipe(recipes[0]);
     } catch (error) {
         console.error("Error getting recipe:", error);
         return null;
@@ -89,8 +87,8 @@ export const getAllRecipes = async (): Promise<RecipeWithImageURL[]> => {
     try {
         const recipes = await getDocuments<Recipe>("recipes");
 
-        // Resolve all image URLs in parallel
-        const recipesWithURLs = await Promise.all(recipes.map(transformRecipe));
+        // Transform all recipes
+        const recipesWithURLs = recipes.map(transformRecipe);
 
         return recipesWithURLs.map((recipe) =>
             convertFirestoreTimestamps(recipe),
@@ -117,7 +115,7 @@ export const getRecipesByMaxPrice = async (
             "asc",
         );
 
-        const recipesWithURLs = await Promise.all(recipes.map(transformRecipe));
+        const recipesWithURLs = recipes.map(transformRecipe);
 
         return recipesWithURLs.map((recipe) =>
             convertFirestoreTimestamps(recipe),
@@ -144,7 +142,7 @@ export const getRecipesByMaxCalories = async (
             "asc",
         );
 
-        const recipesWithURLs = await Promise.all(recipes.map(transformRecipe));
+        const recipesWithURLs = recipes.map(transformRecipe);
 
         return recipesWithURLs.map((recipe) =>
             convertFirestoreTimestamps(recipe),
@@ -171,7 +169,7 @@ export const getRecipesByMaxCookTime = async (
             "asc",
         );
 
-        const recipesWithURLs = await Promise.all(recipes.map(transformRecipe));
+        const recipesWithURLs = recipes.map(transformRecipe);
 
         return recipesWithURLs.map((recipe) =>
             convertFirestoreTimestamps(recipe),
